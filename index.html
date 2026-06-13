@@ -7,7 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2=family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg:#0a0f0d; --surface:#111916; --surface2:#182320; --border:#1e2e28;
@@ -23,7 +23,7 @@
     #screen-login{align-items:center;justify-content:center;flex-direction:column;}
     .login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:380px;max-width:95vw;position:relative;z-index:2;}
     .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center;}
-    .login-logo img{height:44px;object-fit:contain;background:transparent;border-radius:10px;padding:3px;}
+    .login-logo img{width:44px;height:44px;object-fit:contain;background:white;border-radius:10px;padding:3px;}
     .login-logo-text{font-weight:800;font-size:18px;}
     .login-logo-text span{color:var(--accent);font-size:12px;font-weight:400;display:block;}
     .login-title{font-weight:800;font-size:20px;margin-bottom:6px;text-align:center;}
@@ -49,7 +49,7 @@
     .portal{display:flex;width:100%;min-height:100vh;}
     .sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;position:fixed;top:0;left:0;bottom:0;z-index:100;}
     .logo{display:flex;align-items:center;gap:10px;padding:0 22px 28px;border-bottom:1px solid var(--border);}
-    .logo img{height:32px;object-fit:contain;background:transparent;flex-shrink:0;}
+    .logo img{width:30px;height:30px;object-fit:contain;background:white;border-radius:6px;padding:2px;flex-shrink:0;}
     .logo-text{font-weight:800;font-size:13px;line-height:1.2;}
     .logo-text span{color:var(--accent);display:block;font-size:11px;font-weight:400;}
     nav{flex:1;padding:18px 12px;display:flex;flex-direction:column;gap:2px;}
@@ -106,7 +106,7 @@
     .item-status{font-size:11px;color:var(--muted);margin-top:2px;}
     .btn-sm{font-size:11px;padding:4px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;transition:.15s;}
     .btn-sm:hover{border-color:var(--accent);color:var(--accent);}
-    .btn-primary{padding:11px 22px;background:var(--accent);color:#0a0f0d;border:none;border-radius:99px;font-weight:700;font-size:13px;cursor:pointer;transition:.15s;}
+    .btn-primary{padding:11px 22px;background:var(--accent);color:#0a0f0d;border:none;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;transition:.15s;}
     .btn-primary:hover{background:var(--accent2);}
     .btn-outline{padding:7px 14px;background:transparent;border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;transition:.15s;}
     .btn-outline:hover{background:#1a3028;}
@@ -226,9 +226,9 @@
 <div class="screen active" id="screen-login">
   <div class="login-box">
     <div class="login-logo">
-      <img src="logo.png" alt="ION STORAGE POWER" style="width:160px; height:auto; margin-bottom:5px;" />
+      <img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" />
+      <div class="login-logo-text">Terravolt Eco<span>Partner & Customer Portal</span></div>
     </div>
-    <div class="login-logo-text" style="text-align:center; margin-bottom:15px;">Terravolt Eco<span style="color:var(--accent);">Partner & Customer Portal</span></div>
     <div class="login-title">Welcome</div>
     <div class="login-sub">เลือกประเภทผู้ใช้งาน</div>
     <div class="role-grid">
@@ -256,7 +256,7 @@
 <div class="screen" id="screen-dealer">
   <div class="mobile-header" id="dealer-mobile-header">
     <div class="mobile-header-logo">
-      <img src="logo.png" style="height:26px; width:auto;" />
+      <img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" style="width:28px;height:28px;border-radius:6px;" />
       <div><div class="mobile-header-title">Partner Portal</div><div class="mobile-header-sub" id="dealer-company-sub">—</div></div>
     </div>
     <div class="mobile-header-actions">
@@ -275,7 +275,7 @@
   </nav>
   <div class="portal">
     <aside class="sidebar">
-      <div class="logo"><img src="logo.png" style="height:35px; width:auto;" /><div class="logo-text">Terravolt Eco<span>Partner Portal</span></div></div>
+      <div class="logo"><img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" /><div class="logo-text">Terravolt Eco<span>Partner Portal</span></div></div>
       <nav>
         <div class="nav-label">Main</div>
         <div class="nav-item active" onclick="navTo('dealer','dashboard',this)"><span class="nav-icon">📊</span> Dashboard</div>
@@ -397,7 +397,7 @@
 <div class="screen" id="screen-customer">
   <div class="mobile-header" id="customer-mobile-header">
     <div class="mobile-header-logo">
-      <img src="logo.png" style="height:26px; width:auto;" />
+      <img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" style="width:28px;height:28px;border-radius:6px;" />
       <div><div class="mobile-header-title">My Account</div><div class="mobile-header-sub" id="cust-company-sub">—</div></div>
     </div>
     <div class="mobile-header-actions">
@@ -415,7 +415,7 @@
   </nav>
   <div class="portal">
     <aside class="sidebar">
-      <div class="logo"><img src="logo.png" style="height:35px; width:auto;" /><div class="logo-text">Terravolt Eco<span>My Account</span></div></div>
+      <div class="logo"><img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" /><div class="logo-text">Terravolt Eco<span>My Account</span></div></div>
       <nav>
         <div class="nav-item active" onclick="navTo('customer','home',this)"><span class="nav-icon">🏠</span> หน้าหลัก</div>
         <div class="nav-item" onclick="navTo('customer','devices',this)"><span class="nav-icon">📡</span> เครื่องของฉัน</div>
@@ -476,7 +476,7 @@
       </div>
 
       <div class="page" id="customer-page-billing">
-        <div class="topbar"><div class="page-title">ชำrateเงิน<span>ประวัติการชำระ</span></div></div>
+        <div class="topbar"><div class="page-title">ชำระเงิน<span>ประวัติการชำระ</span></div></div>
         <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
           <div>
             <div style="font-size:12px;color:var(--muted);">ยอดค้างชำระ</div>
@@ -533,8 +533,10 @@
   let currentDealerId = null;
   let currentUserData = null;
 
+  // Apply theme
   if (localStorage.getItem('tv_theme') === 'light') document.body.classList.add('light-mode');
 
+  // Check ref param
   const urlRef = new URLSearchParams(window.location.search).get('ref');
   if (urlRef) sessionStorage.setItem('tv_ref', urlRef);
 
@@ -555,6 +557,7 @@
       } catch(e) {
         currentRole = selectedRole || 'customer';
       }
+      // Only allow dealer or customer
       if (currentRole !== 'dealer' && currentRole !== 'customer') {
         showToast('⚠️','ไม่มีสิทธิ์','Portal นี้สำหรับ Dealer และลูกค้าเท่านั้น');
         auth.signOut(); return;
@@ -586,7 +589,6 @@
     document.getElementById('role-' + role).classList.add('selected');
   }
 
-  // (รักษาระบบฟังก์ชันความปลอดภัยและการ Login ไว้ครบถ้วน)
   function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const pass = document.getElementById('login-password').value;
@@ -617,6 +619,7 @@
     });
   }
 
+  // ══ NAVIGATION ══
   function navTo(portal, page, el) {
     document.querySelectorAll('#screen-' + portal + ' .page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('#screen-' + portal + ' .nav-item').forEach(n => n.classList.remove('active'));
@@ -625,6 +628,7 @@
     window.scrollTo(0,0);
   }
 
+  // ══ DARK MODE ══
   function toggleDark() {
     const isLight = document.body.classList.toggle('light-mode');
     localStorage.setItem('tv_theme', isLight ? 'light' : 'dark');
@@ -633,6 +637,7 @@
     });
   }
 
+  // ══ TOAST ══
   let toastTimer;
   function showToast(icon, title, sub) {
     clearTimeout(toastTimer);
@@ -798,7 +803,7 @@
       if (devList && devList.innerHTML === '') devList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
       if (homeDevList && homeDevList.innerHTML === '') homeDevList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
 
-      // คำนวณสรุปค่าจำลองพลังงานเข้าหน้าแรก
+      // คำนวณจำลอง Metrics การประหยัดพลังงานอ้างอิงจาก Output เครื่อง
       if(deviceCount > 0) {
         document.getElementById('cust-co2').textContent = (totalOutput * 0.45).toFixed(1) + ' kg';
         document.getElementById('cust-savings').textContent = '฿ ' + Math.round(totalOutput * 4.2).toLocaleString();
