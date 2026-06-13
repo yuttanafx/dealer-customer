@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terravolt Eco — Partner & Customer Portal</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2=family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0a0f0d; --surface:#111916; --surface2:#182320; --border:#1e2e28;
+      --accent:#2ecc71; --accent2:#00ffa3; --text:#e8f5ee; --muted:#5a7a68;
+      --warning:#f39c12; --danger:#e74c3c; --info:#4a9eff; --radius:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Sarabun',sans-serif;font-size:15px;min-height:100vh;}
+    .screen{display:none;min-height:100vh;}
+    .screen.active{display:flex;}
+
+    /* ══ LOGIN ══ */
+    #screen-login{align-items:center;justify-content:center;flex-direction:column;}
+    .login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:380px;max-width:95vw;position:relative;z-index:2;}
+    .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center;}
+    .login-logo img{width:44px;height:44px;object-fit:contain;background:white;border-radius:10px;padding:3px;}
+    .login-logo-text{font-weight:800;font-size:18px;}
+    .login-logo-text span{color:var(--accent);font-size:12px;font-weight:400;display:block;}
+    .login-title{font-weight:800;font-size:20px;margin-bottom:6px;text-align:center;}
+    .login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;}
+    .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+    .role-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:18px 10px;text-align:center;cursor:pointer;transition:.2s;}
+    .role-card:hover{border-color:var(--accent);background:#1a3028;}
+    .role-card.selected{border-color:var(--accent);background:#1a3028;}
+    .role-icon{font-size:28px;margin-bottom:8px;}
+    .role-label{font-size:14px;font-weight:700;}
+    .role-desc{font-size:11px;color:var(--muted);margin-top:3px;}
+    .login-form{display:flex;flex-direction:column;gap:10px;}
+    .login-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;outline:none;transition:.15s;width:100%;}
+    .login-input:focus{border-color:var(--accent);}
+    .btn-login{padding:12px;background:var(--accent);color:#0a0f0d;border:none;border-radius:10px;font-family:'Sarabun',sans-serif;font-weight:800;font-size:14px;cursor:pointer;width:100%;margin-top:6px;transition:.15s;}
+    .btn-login:hover{background:var(--accent2);}
+    .login-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:10px;}
+
+    /* ══ CANVAS ══ */
+    #electric-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+
+    /* ══ SHARED LAYOUT ══ */
+    .portal{display:flex;width:100%;min-height:100vh;}
+    .sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+    .logo{display:flex;align-items:center;gap:10px;padding:0 22px 28px;border-bottom:1px solid var(--border);}
+    .logo img{width:30px;height:30px;object-fit:contain;background:white;border-radius:6px;padding:2px;flex-shrink:0;}
+    .logo-text{font-weight:800;font-size:13px;line-height:1.2;}
+    .logo-text span{color:var(--accent);display:block;font-size:11px;font-weight:400;}
+    nav{flex:1;padding:18px 12px;display:flex;flex-direction:column;gap:2px;}
+    .nav-label{font-size:10px;letter-spacing:.1em;color:var(--muted);padding:10px 10px 4px;text-transform:uppercase;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--muted);cursor:pointer;transition:.15s;font-size:13.5px;}
+    .nav-item:hover{background:var(--surface2);color:var(--text);}
+    .nav-item.active{background:#1a3028;color:var(--accent);font-weight:600;}
+    .nav-icon{font-size:15px;width:20px;text-align:center;}
+    .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
+    .user-badge{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),#0a8a4a);border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:13px;color:#0a0f0d;flex-shrink:0;}
+    .user-name{font-weight:500;font-size:13px;}
+    .user-role{font-size:11px;color:var(--muted);}
+    .main-content{margin-left:220px;flex:1;padding:36px 40px;max-width:960px;}
+    .page{display:none;}
+    .page.active{display:block;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;}
+    .page-title{font-weight:800;font-size:26px;}
+    .page-title span{color:var(--muted);font-weight:400;font-size:15px;display:block;margin-top:2px;}
+    .btn-logout{padding:6px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;transition:.15s;}
+    .btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+    .btn-icon{width:36px;height:36px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;font-size:15px;}
+    .btn-icon:hover{background:var(--surface2);}
+
+    /* ══ COMPONENTS ══ */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:20px;}
+    .stats{display:grid;gap:16px;margin-bottom:20px;}
+    .stats-2{grid-template-columns:1fr 1fr;}
+    .stats-3{grid-template-columns:repeat(3,1fr);}
+    .stats-4{grid-template-columns:repeat(4,1fr);}
+    .card-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+    .card-value{font-size:28px;font-weight:800;}
+    .card-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+    .green{color:var(--accent);}
+    .yellow{color:var(--warning);}
+    .section-title{font-weight:700;font-size:14px;margin-bottom:14px;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+    .divider{height:1px;background:var(--border);margin:20px 0;}
+    .badge{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:500;}
+    .badge-green{background:#0d2e1c;color:var(--accent);}
+    .badge-yellow{background:#2e1f0a;color:var(--warning);}
+    .badge-red{background:#2e0d0d;color:var(--danger);}
+    .badge-gray{background:var(--surface2);color:var(--muted);}
+    .list-item{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface2);border-radius:10px;margin-bottom:8px;}
+    .item-avatar{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:13px;flex-shrink:0;}
+    .av-blue{background:#0d1f3c;color:var(--info);}
+    .av-teal{background:#0d2e2c;color:#2eccc9;}
+    .av-green{background:#0d2e1c;color:var(--accent);}
+    .item-info{flex:1;}
+    .item-title{font-size:13px;font-weight:500;}
+    .item-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+    .item-right{text-align:right;}
+    .item-amount{font-size:16px;font-weight:800;color:var(--accent);}
+    .item-status{font-size:11px;color:var(--muted);margin-top:2px;}
+    .btn-sm{font-size:11px;padding:4px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;transition:.15s;}
+    .btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+    .btn-primary{padding:11px 22px;background:var(--accent);color:#0a0f0d;border:none;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;transition:.15s;}
+    .btn-primary:hover{background:var(--accent2);}
+    .btn-outline{padding:7px 14px;background:transparent;border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;transition:.15s;}
+    .btn-outline:hover{background:#1a3028;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.full{grid-column:1/-1;}
+    label{font-size:12px;color:var(--muted);}
+    input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;outline:none;transition:.15s;width:100%;}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+    textarea{resize:vertical;min-height:80px;}
+    .step-label{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--accent);margin-bottom:12px;margin-top:16px;}
+    .field-error{color:var(--danger);font-size:11px;margin-top:2px;display:none;}
+    .upload-zone{border:1.5px dashed var(--border);border-radius:10px;padding:28px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s;margin-top:8px;}
+    .upload-zone:hover{border-color:var(--accent);color:var(--accent);}
+    .progress-bar{height:4px;background:var(--border);border-radius:99px;margin-top:8px;overflow:hidden;}
+    .progress-fill{height:100%;background:var(--accent);border-radius:99px;}
+    .device-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px;}
+    .device-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .device-name{font-weight:700;font-size:15px;}
+    .device-serial{font-size:11px;color:var(--muted);}
+    .device-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+    .metric{background:var(--surface);border-radius:8px;padding:10px;text-align:center;}
+    .metric-val{font-weight:800;font-size:18px;}
+    .metric-label{font-size:10px;color:var(--muted);margin-top:2px;}
+
+    /* ══ MODAL ══ */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:480px;max-width:95vw;animation:slideUp .25s ease;}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .modal-title{font-weight:800;font-size:16px;}
+    .modal-close{cursor:pointer;color:var(--muted);font-size:20px;}
+
+    /* ══ TOAST ══ */
+    .toast{display:none;position:fixed;bottom:28px;right:28px;background:#0d2e1c;border:1px solid var(--accent);border-radius:12px;padding:14px 18px;align-items:center;gap:12px;z-index:9999;max-width:340px;}
+    .toast.show{display:flex;animation:fadeIn .3s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ══ MOBILE ══ */
+    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding:6px 0 env(safe-area-inset-bottom,6px);}
+    .bottom-nav-inner{display:flex;justify-content:space-around;align-items:center;}
+    .bnav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;cursor:pointer;color:var(--muted);transition:.15s;border-radius:10px;min-width:52px;}
+    .bnav-item.active{color:var(--accent);}
+    .bnav-icon{font-size:20px;line-height:1;}
+    .bnav-label{font-size:10px;font-weight:600;}
+    .mobile-header{display:none;position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:150;padding:0 16px;align-items:center;justify-content:space-between;height:56px;overflow:hidden;}
+    .mobile-header-logo{display:flex;align-items:center;gap:8px;}
+    .mobile-header-title{font-weight:700;font-size:15px;}
+    .mobile-header-sub{font-size:11px;color:var(--muted);}
+    .mobile-header-actions{display:flex;gap:8px;}
+    .mobile-btn-icon{width:32px;height:32px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;font-size:14px;}
+
+    /* ══ LOADING ══ */
+    #loading-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,13,.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+    #loading-overlay.show{display:flex;}
+    .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ══ LIGHT MODE ══ */
+    body.light-mode{--bg:#f0f4f2;--surface:#ffffff;--surface2:#e8f0ec;--border:#c8ddd4;--text:#0d1f18;--muted:#5a7a68;}
+
+    @media(max-width:768px){
+      .sidebar{display:none !important;}
+      .bottom-nav{display:block;}
+      .mobile-header{display:flex;}
+      .main-content{margin-left:0 !important;padding:72px 16px 90px !important;max-width:100% !important;}
+      .stats-3,.stats-4{grid-template-columns:1fr 1fr !important;}
+      .stats-2{grid-template-columns:1fr 1fr !important;}
+      .two-col{grid-template-columns:1fr !important;}
+      .form-grid{grid-template-columns:1fr !important;}
+      .form-group.full{grid-column:1 !important;}
+      .login-box{padding:28px 20px;}
+      .toast{bottom:80px;left:16px;right:16px;max-width:100%;}
+      .modal{width:95vw;padding:20px;}
+      .topbar{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="electric-canvas"></canvas>
+
+<div id="loading-overlay"><div class="spinner"></div><div style="font-size:14px;color:var(--muted);">กำลังโหลด...</div></div>
+
+<div class="toast" id="toast">
+  <div id="toast-icon" style="font-size:20px;"></div>
+  <div><div id="toast-title" style="font-weight:600;font-size:13px;"></div><div id="toast-sub" style="font-size:11px;color:var(--muted);margin-top:2px;"></div></div>
+</div>
+
+<div class="modal-overlay" id="modal-ticket">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🛠️ แจ้งปัญหา</div><div class="modal-close" onclick="closeModal('modal-ticket')">✕</div></div>
+    <div class="form-group" style="margin-bottom:10px;"><label>ประเภทปัญหา</label><select id="tk-type"><option>เสียงดัง</option><option>เครื่องไม่ทำงาน</option><option>รั่ว / ชื้น</option><option>ไฟดับ</option><option>อื่นๆ</option></select></div>
+    <div class="form-group" style="margin-bottom:10px;"><label>รายละเอียด</label><textarea id="tk-desc" placeholder="อธิบายปัญหา..."></textarea></div>
+    <button class="btn-primary" style="width:100%;" onclick="submitTicket()">ส่งแจ้งปัญหา</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-pay">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">💳 ชำระเงิน</div><div class="modal-close" onclick="closeModal('modal-pay')">✕</div></div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PromptPay-TerravoltEco" style="border-radius:10px;background:white;padding:8px;width:180px;" />
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;">สแกน PromptPay</div>
+    </div>
+    <div class="upload-zone" onclick="document.getElementById('pay-slip-file').click()">
+      <div style="font-size:24px;" id="pay-slip-icon">📎</div>
+      <div id="pay-slip-label">อัปโหลดสลิป</div>
+      <input id="pay-slip-file" type="file" accept="image/*" capture="environment" style="display:none" onchange="handleSlipPreview(this)" />
+    </div>
+    <div id="pay-slip-preview-wrap" style="display:none;margin-top:10px;"><img id="pay-slip-preview" style="max-width:100%;border-radius:8px;" /></div>
+    <button class="btn-primary" style="width:100%;margin-top:12px;" onclick="submitCustModalSlip()">📤 ส่งสลิป</button>
+  </div>
+</div>
+
+<div class="screen active" id="screen-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" />
+      <div class="login-logo-text">Terravolt Eco<span>Partner & Customer Portal</span></div>
+    </div>
+    <div class="login-title">Welcome</div>
+    <div class="login-sub">เลือกประเภทผู้ใช้งาน</div>
+    <div class="role-grid">
+      <div class="role-card" id="role-dealer" onclick="selectRole('dealer')">
+        <div class="role-icon">🤝</div>
+        <div class="role-label">Dealer</div>
+        <div class="role-desc">พาร์ทเนอร์</div>
+      </div>
+      <div class="role-card" id="role-customer" onclick="selectRole('customer')">
+        <div class="role-icon">👤</div>
+        <div class="role-label">ลูกค้า</div>
+        <div class="role-desc">My Account</div>
+      </div>
+    </div>
+    <div class="login-form">
+      <input class="login-input" id="login-email" type="email" placeholder="Email" autocomplete="email" />
+      <input class="login-input" id="login-password" type="password" placeholder="รหัสผ่าน" autocomplete="current-password" />
+      <button class="btn-login" id="login-btn" onclick="doLogin()">เข้าสู่ระบบ →</button>
+    </div>
+    <div id="login-error" style="color:var(--danger);font-size:12px;text-align:center;margin-top:8px;display:none;"></div>
+    <div class="login-hint">กรุณาเลือกประเภทก่อน Login</div>
+  </div>
+</div>
+
+<div class="screen" id="screen-dealer">
+  <div class="mobile-header" id="dealer-mobile-header">
+    <div class="mobile-header-logo">
+      <img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" style="width:28px;height:28px;border-radius:6px;" />
+      <div><div class="mobile-header-title">Partner Portal</div><div class="mobile-header-sub" id="dealer-company-sub">—</div></div>
+    </div>
+    <div class="mobile-header-actions">
+      <div class="mobile-btn-icon" onclick="toggleDark()">🌙</div>
+      <div class="mobile-btn-icon" onclick="doLogout()">🚪</div>
+    </div>
+  </div>
+  <nav class="bottom-nav" id="dealer-bottom-nav">
+    <div class="bottom-nav-inner">
+      <div class="bnav-item active" onclick="navTo('dealer','dashboard',this)"><div class="bnav-icon">📊</div><div class="bnav-label">Home</div></div>
+      <div class="bnav-item" onclick="navTo('dealer','customers',this)"><div class="bnav-icon">👥</div><div class="bnav-label">ลูกค้า</div></div>
+      <div class="bnav-item" onclick="navTo('dealer','onboarding',this)"><div class="bnav-icon">📋</div><div class="bnav-label">เพิ่มลูกค้า</div></div>
+      <div class="bnav-item" onclick="navTo('dealer','wallet',this)"><div class="bnav-icon">👛</div><div class="bnav-label">Wallet</div></div>
+      <div class="bnav-item" onclick="navTo('dealer','payment',this)"><div class="bnav-icon">💳</div><div class="bnav-label">ชำระ</div></div>
+    </div>
+  </nav>
+  <div class="portal">
+    <aside class="sidebar">
+      <div class="logo"><img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" /><div class="logo-text">Terravolt Eco<span>Partner Portal</span></div></div>
+      <nav>
+        <div class="nav-label">Main</div>
+        <div class="nav-item active" onclick="navTo('dealer','dashboard',this)"><span class="nav-icon">📊</span> Dashboard</div>
+        <div class="nav-item" onclick="navTo('dealer','customers',this)"><span class="nav-icon">👥</span> ลูกค้าของฉัน</div>
+        <div class="nav-label">Operations</div>
+        <div class="nav-item" onclick="navTo('dealer','onboarding',this)"><span class="nav-icon">📋</span> เพิ่มลูกค้าใหม่</div>
+        <div class="nav-item" onclick="navTo('dealer','tickets',this)"><span class="nav-icon">🔧</span> Service Tickets</div>
+        <div class="nav-label">Finance</div>
+        <div class="nav-item" onclick="navTo('dealer','wallet',this)"><span class="nav-icon">👛</span> Wallet</div>
+        <div class="nav-item" onclick="navTo('dealer','payment',this)"><span class="nav-icon">💳</span> ชำระเงิน</div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-badge"><div class="user-avatar">D</div><div><div class="user-name" id="dealer-name-display">Dealer</div><div class="user-role" id="dealer-id-display">—</div></div></div>
+        <button class="btn-logout" style="margin-top:10px;width:100%;" onclick="doLogout()">Sign Out</button>
+      </div>
+    </aside>
+    <div class="main-content">
+
+      <div class="page active" id="dealer-page-dashboard">
+        <div class="topbar"><div class="page-title">สวัสดี Partner 👋<span>จัดการลูกค้าและธุรกิจของคุณ</span></div><div style="display:flex;gap:8px;"><div class="btn-icon" onclick="toggleDark()">🌙</div><button class="btn-logout" onclick="doLogout()">ออก</button></div></div>
+        <div class="stats stats-3">
+          <div class="card"><div class="card-label">Commission เดือนนี้</div><div class="card-value green" id="d-commission">฿ 0</div></div>
+          <div class="card"><div class="card-label">รอยืนยัน</div><div class="card-value yellow" id="d-pending">฿ 0</div></div>
+          <div class="card"><div class="card-label">ลูกค้าทั้งหมด</div><div class="card-value" id="d-client-count">0</div><div class="progress-bar"><div class="progress-fill" id="d-client-bar" style="width:0%"></div></div></div>
+        </div>
+        <div class="card">
+          <div class="section-title">🔗 ลิงก์แนะนำลูกค้า</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;">
+            <div style="font-size:11px;color:var(--muted);">Dealer ID</div>
+            <div style="font-size:22px;font-weight:800;color:var(--accent);" id="dealer-id-big">—</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+            <div id="ref-link-text" style="font-size:12px;flex:1;word-break:break-all;">—</div>
+            <button class="btn-sm" onclick="copyLink()">📋 คัดลอก</button>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card"><div class="section-title">Recent Activity</div><div id="d-activity"><div style="color:var(--muted);font-size:13px;">ยังไม่มีกิจกรรม</div></div></div>
+          <div class="card"><div class="section-title">ลูกค้าล่าสุด</div><div id="d-dash-customers"><div style="color:var(--muted);font-size:13px;">ยังไม่มีลูกค้า</div></div></div>
+        </div>
+      </div>
+
+      <div class="page" id="dealer-page-customers">
+        <div class="topbar"><div class="page-title">ลูกค้าของฉัน<span>เฉพาะลูกค้าในสังกัดของคุณ</span></div></div>
+        <div class="card"><div id="d-customers-list"><div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">กำลังโหลด...</div></div></div>
+      </div>
+
+      <div class="page" id="dealer-page-onboarding">
+        <div class="topbar"><div class="page-title">เพิ่มลูกค้าใหม่</div></div>
+        <div class="card">
+          <div class="step-label" style="margin-top:0;">1 — ข้อมูลลูกค้า</div>
+          <div class="form-grid" style="margin-bottom:16px;">
+            <div class="form-group"><label>ชื่อบริษัท</label><input id="ob-company" placeholder="ABC Co., Ltd." /><div class="field-error" id="err-ob-company">จำเป็น</div></div>
+            <div class="form-group"><label>Tax ID (13 หลัก)</label><input id="ob-tax" placeholder="0000000000000" maxlength="13" /><div class="field-error" id="err-ob-tax">ต้องมี 13 หลัก</div></div>
+            <div class="form-group full"><label>ที่อยู่</label><input id="ob-address" placeholder="ที่อยู่เต็ม" /></div>
+            <div class="form-group"><label>ชื่อผู้ติดต่อ</label><input id="ob-contact" placeholder="ชื่อ-นามสกุล" /><div class="field-error" id="err-ob-contact">จำเป็น</div></div>
+            <div class="form-group"><label>เบอร์โทร</label><input id="ob-phone" type="tel" placeholder="08X-XXX-XXXX" /><div class="field-error" id="err-ob-phone">จำเป็น</div></div>
+          </div>
+          <div class="step-label">2 — Package</div>
+          <div class="form-grid" style="margin-bottom:16px;">
+            <div class="form-group"><label>Package</label><select id="ob-pkg"><option>Monthly Rent (Standard)</option><option>Yearly Rent (Pro)</option><option>Purchase (Lifetime)</option></select></div>
+            <div class="form-group"><label>วันติดตั้ง</label><input type="date" id="ob-date" /></div>
+          </div>
+          <div class="divider"></div>
+          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px;">🔐 สร้าง Login ให้ลูกค้า</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Email ลูกค้า</label><input type="email" id="ob-email" placeholder="customer@example.com" /></div>
+            <div class="form-group"><label>รหัสผ่าน</label><input type="password" id="ob-pass" placeholder="อย่างน้อย 6 ตัว" /></div>
+          </div>
+          <button class="btn-primary" style="margin-top:16px;" onclick="submitOnboarding()">💾 บันทึกลูกค้า + สร้าง Login</button>
+        </div>
+      </div>
+
+      <div class="page" id="dealer-page-tickets">
+        <div class="topbar"><div class="page-title">Service Tickets</div><button class="btn-outline" onclick="document.getElementById('modal-ticket').classList.add('open')">+ แจ้งปัญหา</button></div>
+        <div class="card"><div id="d-ticket-list"><div style="color:var(--muted);font-size:13px;">กำลังโหลด...</div></div></div>
+      </div>
+
+      <div class="page" id="dealer-page-wallet">
+        <div class="topbar"><div class="page-title">Wallet<span>รายการรับเงิน</span></div></div>
+        <div class="stats stats-2">
+          <div class="card"><div class="card-label">ยอดรวม</div><div class="card-value green" id="d-wallet-total">฿ 0</div></div>
+          <div class="card"><div class="card-label">รอยืนยัน</div><div class="card-value yellow" id="d-wallet-pending">฿ 0</div></div>
+        </div>
+        <div class="card"><div class="section-title">รายการ</div><div id="d-wallet-list"><div style="color:var(--muted);font-size:13px;">ยังไม่มีรายการ</div></div></div>
+      </div>
+
+      <div class="page" id="dealer-page-payment">
+        <div class="topbar"><div class="page-title">ชำระเงิน</div></div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="section-title">ช่องทางชำระ</div>
+          <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;"><div style="font-size:22px;">🏦</div><div style="font-weight:600;">KBANK</div><div style="font-size:12px;color:var(--muted);">099-2-XXXXX-X</div></div>
+            <div style="text-align:center;"><div style="background:white;border-radius:10px;padding:8px;display:inline-block;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=PromptPay-TerravoltEco" width="130" height="130" /></div><div style="font-size:11px;color:var(--muted);margin-top:6px;">PromptPay</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">ส่งสลิปชำระเงิน</div>
+          <div class="form-grid">
+            <div class="form-group"><label>ลูกค้า</label><select id="dp-for"></select></div>
+            <div class="form-group"><label>วันที่</label><input type="date" id="dp-date" /></div>
+            <div class="form-group"><label>เวลา</label><input type="time" id="dp-time" /></div>
+            <div class="form-group"><label>จำนวนเงิน (฿)</label><input type="number" id="dp-amount" placeholder="0.00" /></div>
+          </div>
+          <div class="upload-zone" onclick="document.getElementById('dp-slip').click()">
+            <div style="font-size:24px;" id="dp-slip-icon">📎</div>
+            <div id="dp-slip-label">อัปโหลดสลิป</div>
+            <input id="dp-slip" type="file" accept="image/*" capture="environment" style="display:none" onchange="handleDealerSlip(this)" />
+          </div>
+          <div id="dp-preview-wrap" style="display:none;margin-top:10px;"><img id="dp-preview" style="max-width:100%;border-radius:8px;" /></div>
+          <button class="btn-primary" style="margin-top:12px;" onclick="submitDealerPayment()">💾 ยืนยันการชำระ</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-customer">
+  <div class="mobile-header" id="customer-mobile-header">
+    <div class="mobile-header-logo">
+      <img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" style="width:28px;height:28px;border-radius:6px;" />
+      <div><div class="mobile-header-title">My Account</div><div class="mobile-header-sub" id="cust-company-sub">—</div></div>
+    </div>
+    <div class="mobile-header-actions">
+      <div class="mobile-btn-icon" onclick="toggleDark()">🌙</div>
+      <div class="mobile-btn-icon" onclick="doLogout()">🚪</div>
+    </div>
+  </div>
+  <nav class="bottom-nav" id="customer-bottom-nav">
+    <div class="bottom-nav-inner">
+      <div class="bnav-item active" onclick="navTo('customer','home',this)"><div class="bnav-icon">🏠</div><div class="bnav-label">Home</div></div>
+      <div class="bnav-item" onclick="navTo('customer','devices',this)"><div class="bnav-icon">📡</div><div class="bnav-label">เครื่อง</div></div>
+      <div class="bnav-item" onclick="navTo('customer','billing',this)"><div class="bnav-icon">💳</div><div class="bnav-label">ชำระ</div></div>
+      <div class="bnav-item" onclick="navTo('customer','support',this)"><div class="bnav-icon">🎧</div><div class="bnav-label">แจ้งปัญหา</div></div>
+    </div>
+  </nav>
+  <div class="portal">
+    <aside class="sidebar">
+      <div class="logo"><img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" /><div class="logo-text">Terravolt Eco<span>My Account</span></div></div>
+      <nav>
+        <div class="nav-item active" onclick="navTo('customer','home',this)"><span class="nav-icon">🏠</span> หน้าหลัก</div>
+        <div class="nav-item" onclick="navTo('customer','devices',this)"><span class="nav-icon">📡</span> เครื่องของฉัน</div>
+        <div class="nav-item" onclick="navTo('customer','billing',this)"><span class="nav-icon">💳</span> ชำระเงิน</div>
+        <div class="nav-item" onclick="navTo('customer','support',this)"><span class="nav-icon">🎧</span> แจ้งปัญหา</div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-badge"><div class="user-avatar" style="background:linear-gradient(135deg,#4a9eff,#0a4a8a);color:white;">C</div><div><div class="user-name" id="cust-name-display">ลูกค้า</div><div class="user-role" id="cust-company-display">—</div></div></div>
+        <button class="btn-logout" style="margin-top:10px;width:100%;" onclick="doLogout()">Sign Out</button>
+      </div>
+    </aside>
+    <div class="main-content">
+
+      <div class="page active" id="customer-page-home">
+        <div class="topbar"><div class="page-title">สวัสดี ☀️<span>ยินดีต้อนรับ</span></div><div style="display:flex;gap:8px;"><div class="btn-icon" onclick="toggleDark()">🌙</div><button class="btn-logout" onclick="doLogout()">ออก</button></div></div>
+        <div class="stats stats-4">
+          <div class="card"><div class="card-label">🌱 CO2 ลดได้</div><div class="card-value green" id="cust-co2">0 kg</div></div>
+          <div class="card"><div class="card-label">ประหยัดได้</div><div class="card-value green" id="cust-savings">฿ 0</div></div>
+          <div class="card"><div class="card-label">ค้างชำระ</div><div class="card-value yellow" id="cust-due">฿ 0</div></div>
+          <div class="card"><div class="card-label">ประสิทธิภาพ</div><div class="card-value" id="cust-eff">0%</div></div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <div class="section-title" style="margin:0;">เครื่องของฉัน</div>
+            <button class="btn-outline" onclick="navTo('customer','devices',document.querySelectorAll('#screen-customer .nav-item')[1])">ดูทั้งหมด</button>
+          </div>
+          <div id="cust-home-devices"><div style="color:var(--muted);font-size:13px;">กำลังโหลด...</div></div>
+        </div>
+        <div class="card">
+          <button class="btn-primary" style="width:100%;" onclick="toggleMonitor('home')">📊 ดู Live Monitor</button>
+          <div id="monitor-home-embed" style="display:none;margin-top:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="font-weight:700;font-size:14px;color:var(--accent);">📊 Live Monitor</div>
+              <button class="btn-sm" onclick="toggleMonitor('home')">✕</button>
+            </div>
+            <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);">
+              <iframe src="https://ion-storage-dashboard.vercel.app/" style="width:100%;height:550px;border:none;" loading="lazy"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page" id="customer-page-devices">
+        <div class="topbar"><div class="page-title">เครื่องของฉัน<span>อุปกรณ์ที่ติดตั้ง</span></div></div>
+        <div id="cust-devices-list"><div style="color:var(--muted);font-size:13px;">กำลังโหลด...</div></div>
+        <div class="card" style="margin-top:16px;">
+          <button class="btn-primary" style="width:100%;" onclick="toggleMonitor('devices')">📊 ดู Live Monitor</button>
+          <div id="monitor-devices-embed" style="display:none;margin-top:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="font-weight:700;font-size:14px;color:var(--accent);">📊 Live Monitor</div>
+              <button class="btn-sm" onclick="toggleMonitor('devices')">✕</button>
+            </div>
+            <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);">
+              <iframe src="https://ion-storage-dashboard.vercel.app/" style="width:100%;height:550px;border:none;" loading="lazy"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page" id="customer-page-billing">
+        <div class="topbar"><div class="page-title">ชำระเงิน<span>ประวัติการชำระ</span></div></div>
+        <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:12px;color:var(--muted);">ยอดค้างชำระ</div>
+            <div style="font-size:28px;font-weight:800;color:var(--warning);" id="cust-due-amount">฿ 0</div>
+          </div>
+          <button class="btn-primary" onclick="document.getElementById('modal-pay').classList.add('open')">ชำระเงิน</button>
+        </div>
+        <div class="card">
+          <div class="section-title">📸 ส่งสลิปชำระเงิน</div>
+          <div class="upload-zone" onclick="document.getElementById('cust-slip-file').click()">
+            <div style="font-size:24px;" id="cust-slip-icon">📎</div>
+            <div id="cust-slip-label">ถ่ายรูป / อัปโหลดสลิป</div>
+            <input id="cust-slip-file" type="file" accept="image/*" capture="environment" style="display:none" onchange="handleCustSlip(this)" />
+          </div>
+          <div id="cust-slip-prev-wrap" style="display:none;margin-top:10px;"><img id="cust-slip-prev" style="max-width:100%;border-radius:8px;" /></div>
+          <div id="cust-slip-actions" style="display:none;margin-top:10px;">
+            <div class="form-group"><label>หมายเหตุ</label><input id="cust-slip-note" placeholder="เช่น โอนเมื่อ 10:30 น." /></div>
+            <button class="btn-primary" style="margin-top:8px;" onclick="submitCustSlip()">📤 ส่งให้ HQ</button>
+          </div>
+        </div>
+        <div class="card"><div class="section-title">ประวัติการชำระ</div><div id="cust-tx-list"><div style="color:var(--muted);font-size:13px;">ยังไม่มีรายการ</div></div></div>
+      </div>
+
+      <div class="page" id="customer-page-support">
+        <div class="topbar"><div class="page-title">แจ้งปัญหา</div></div>
+        <div class="card" style="margin-bottom:16px;">
+          <button class="btn-primary" style="width:100%;" onclick="document.getElementById('modal-ticket').classList.add('open')">+ แจ้งปัญหาใหม่</button>
+        </div>
+        <div class="card"><div class="section-title">รายการแจ้งปัญหา</div><div id="cust-ticket-list"><div style="color:var(--muted);font-size:13px;">ยังไม่มีรายการ</div></div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ══ FIREBASE ══
+  const firebaseConfig = {
+    apiKey: "AIzaSyDlxlSghlBN8Q6zzHTbPlnXBZVPKsGDU1I",
+    authDomain: "terravolt-eco.firebaseapp.com",
+    projectId: "terravolt-eco",
+    storageBucket: "terravolt-eco.firebasestorage.app",
+    messagingSenderId: "332650091089",
+    appId: "1:332650091089:web:9d183ebf06b90398709e70"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // ══ STATE ══
+  let currentRole = null;
+  let selectedRole = null;
+  let currentUserUid = null;
+  let currentDealerId = null;
+  let currentUserData = null;
+
+  // Apply theme
+  if (localStorage.getItem('tv_theme') === 'light') document.body.classList.add('light-mode');
+
+  // Check ref param
+  const urlRef = new URLSearchParams(window.location.search).get('ref');
+  if (urlRef) sessionStorage.setItem('tv_ref', urlRef);
+
+  // ══ AUTH STATE ══
+  auth.onAuthStateChanged(async function(user) {
+    if (user) {
+      currentUserUid = user.uid;
+      try {
+        const roleDoc = await db.collection('user_roles').doc(user.uid).get();
+        if (roleDoc.exists) {
+          const rd = roleDoc.data();
+          currentRole = selectedRole || rd.role || 'customer';
+          currentDealerId = rd.dealer_id || null;
+          currentUserData = rd;
+        } else {
+          currentRole = selectedRole || 'customer';
+        }
+      } catch(e) {
+        currentRole = selectedRole || 'customer';
+      }
+      // Only allow dealer or customer
+      if (currentRole !== 'dealer' && currentRole !== 'customer') {
+        showToast('⚠️','ไม่มีสิทธิ์','Portal นี้สำหรับ Dealer และลูกค้าเท่านั้น');
+        auth.signOut(); return;
+      }
+      showPortal(currentRole, user);
+    }
+  });
+
+  async function showPortal(role, user) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + role).classList.add('active');
+    document.querySelectorAll('.mobile-header, .bottom-nav').forEach(el => el.style.display = 'none');
+    if (role === 'dealer') {
+      document.getElementById('dealer-mobile-header').style.display = 'flex';
+      document.getElementById('dealer-bottom-nav').style.display = 'block';
+      await loadDealerData(user);
+    } else {
+      document.getElementById('customer-mobile-header').style.display = 'flex';
+      document.getElementById('customer-bottom-nav').style.display = 'block';
+      await loadCustomerData(user);
+    }
+    window.scrollTo(0,0);
+  }
+
+  // ══ LOGIN ══
+  function selectRole(role) {
+    selectedRole = role;
+    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('role-' + role).classList.add('selected');
+  }
+
+  function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    const btn = document.getElementById('login-btn');
+    if (!selectedRole) { errEl.textContent = '⚠️ กรุณาเลือกประเภทก่อน'; errEl.style.display='block'; return; }
+    if (!email || !pass) { errEl.textContent = '⚠️ กรุณากรอก Email และรหัสผ่าน'; errEl.style.display='block'; return; }
+    btn.textContent = 'กำลังเข้าระบบ...'; btn.disabled = true; errEl.style.display='none';
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(() => { btn.textContent = 'เข้าสู่ระบบ →'; btn.disabled = false; })
+      .catch(err => {
+        btn.textContent = 'เข้าสู่ระบบ →'; btn.disabled = false;
+        let msg = '❌ Email หรือรหัสผ่านไม่ถูกต้อง';
+        if (err.code === 'auth/too-many-requests') msg = '⚠️ ลองใหม่ภายหลัง';
+        errEl.textContent = msg; errEl.style.display='block';
+      });
+  }
+
+  function doLogout() {
+    selectedRole = null; currentRole = null; currentDealerId = null;
+    auth.signOut().then(() => {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-login').classList.add('active');
+      document.querySelectorAll('.mobile-header, .bottom-nav').forEach(el => el.style.display = 'none');
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+      document.getElementById('login-error').style.display = 'none';
+    });
+  }
+
+  // ══ NAVIGATION ══
+  function navTo(portal, page, el) {
+    document.querySelectorAll('#screen-' + portal + ' .page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('#screen-' + portal + ' .nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(portal + '-page-' + page).classList.add('active');
+    if (el) el.classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  // ══ DARK MODE ══
+  function toggleDark() {
+    const isLight = document.body.classList.toggle('light-mode');
+    localStorage.setItem('tv_theme', isLight ? 'light' : 'dark');
+    document.querySelectorAll('.btn-icon, .mobile-btn-icon').forEach(btn => {
+      if (btn.textContent === '🌙' || btn.textContent === '☀️') btn.textContent = isLight ? '☀️' : '🌙';
+    });
+  }
+
+  // ══ TOAST ══
+  let toastTimer;
+  function showToast(icon, title, sub) {
+    clearTimeout(toastTimer);
+    document.getElementById('toast-icon').textContent = icon;
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-sub').textContent = sub;
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+
+  // ══ DEALER DATA ══
+  async function loadDealerData(user) {
+    const overlay = document.getElementById('loading-overlay');
+    overlay.classList.add('show');
+    try {
+      let dealerName = currentUserData?.name || 'Dealer';
+      let dealerId = currentDealerId;
+
+      if (!dealerId) {
+        const dlSnap = await db.collection('dealers').where('uid','==',user.uid).limit(1).get();
+        if (!dlSnap.empty) {
+          dealerId = dlSnap.docs[0].data().dealer_id;
+          dealerName = dlSnap.docs[0].data().name || dealerName;
+          currentDealerId = dealerId;
+        }
+      }
+
+      if (dealerId) {
+        document.getElementById('dealer-id-display').textContent = 'ID: ' + dealerId;
+        document.getElementById('dealer-id-big').textContent = dealerId;
+        const refLink = window.location.origin + window.location.pathname + '?ref=' + dealerId;
+        document.getElementById('ref-link-text').textContent = refLink;
+        window._refLink = refLink;
+      }
+      document.getElementById('dealer-name-display').textContent = dealerName;
+      document.getElementById('dealer-company-sub').textContent = dealerName;
+
+      let custQuery = db.collection('customers');
+      if (dealerId) custQuery = custQuery.where('dealer_id','==',dealerId);
+      const custSnap = await custQuery.get();
+      renderDealerCustomers(custSnap);
+
+      let paySnap;
+      if (dealerId) {
+        paySnap = await db.collection('payments').where('dealer_id','==',dealerId).get().catch(() => db.collection('payments').get());
+      } else {
+        paySnap = await db.collection('payments').get();
+      }
+      let total = 0, pending = 0;
+      const walletList = document.getElementById('d-wallet-list');
+      if (walletList) walletList.innerHTML = '';
+      paySnap.forEach(doc => {
+        const d = doc.data();
+        const amt = parseFloat(d.amount) || 0;
+        if (d.status === 'success') total += amt; else pending += amt;
+        if (walletList) {
+          const el = document.createElement('div');
+          el.className = 'list-item';
+          el.innerHTML = `<div class="item-info"><div class="item-title">${d.customer_name||'—'}</div><div class="item-sub">Ref: ${d.ref||'—'} • ${d.date||'—'}</div></div><div class="item-right"><div class="item-amount">+ ฿${amt.toLocaleString()}</div><div class="item-status" style="color:${d.status==='success'?'var(--accent)':'var(--warning)'};">${d.status==='success'?'✔ สำเร็จ':'⏳ รอ'}</div></div>`;
+          walletList.appendChild(el);
+        }
+      });
+      document.getElementById('d-commission').textContent = '฿ ' + total.toLocaleString();
+      document.getElementById('d-pending').textContent = '฿ ' + pending.toLocaleString();
+      document.getElementById('d-wallet-total').textContent = '฿ ' + total.toLocaleString();
+      document.getElementById('d-wallet-pending').textContent = '฿ ' + pending.toLocaleString();
+
+      const tkSnap = await db.collection('tickets').get();
+      const tkList = document.getElementById('d-ticket-list');
+      if (tkList) tkList.innerHTML = '';
+      tkSnap.forEach(doc => {
+        const d = doc.data();
+        const stClass = d.status==='open'?'badge-green':d.status==='resolved'?'badge-gray':'badge-yellow';
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `<div class="item-info"><div class="item-title">${d.title||'—'}</div><div class="item-sub">${d.customer_name||'—'} • ${d.created_date||'—'}</div></div><span class="badge ${stClass}">${d.status||'—'}</span>`;
+        if (tkList) tkList.appendChild(el);
+      });
+
+    } catch(e) { console.error('loadDealerData:', e); }
+    finally { overlay.classList.remove('show'); }
+  }
+
+  function renderDealerCustomers(snap) {
+    const listEl = document.getElementById('d-customers-list');
+    const dashEl = document.getElementById('d-dash-customers');
+    const dpFor = document.getElementById('dp-for');
+    if (dpFor) dpFor.innerHTML = '';
+    let html = '';
+    let count = 0;
+    if (snap && !snap.empty) {
+      snap.forEach(doc => {
+        count++;
+        const d = doc.data();
+        const ini = (d.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        const cls = ['av-blue','av-teal','av-green'][count%3];
+        const stCls = d.status==='active'?'badge-green':'badge-yellow';
+        html += `<div class="list-item"><div class="item-avatar ${cls}">${ini}</div><div class="item-info"><div class="item-title">${d.name||'—'}</div><div class="item-sub">${d.package||'—'} • ${d.install_date||'—'}</div></div><span class="badge ${stCls}">${d.status==='active'?'Active':'Pending'}</span></div>`;
+        if (dpFor) dpFor.add(new Option(d.name, d.name));
+      });
+    } else {
+      html = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">ยังไม่มีลูกค้า</div>';
+    }
+    if (listEl) listEl.innerHTML = html;
+    if (dashEl) dashEl.innerHTML = html;
+    document.getElementById('d-client-count').textContent = count;
+    document.getElementById('d-client-bar').style.width = Math.min(100, count*5) + '%';
+  }
+
+  // ══ CUSTOMER DATA ══
+  async function loadCustomerData(user) {
+    const overlay = document.getElementById('loading-overlay');
+    overlay.classList.add('show');
+    try {
+      let custData = null;
+      const snap = await db.collection('customers').where('uid','==',user.uid).limit(1).get();
+      if (!snap.empty) {
+        custData = snap.docs[0].data();
+      } else {
+        const snap2 = await db.collection('customers').where('email','==',user.email).limit(1).get();
+        if (!snap2.empty) custData = snap2.docs[0].data();
+      }
+
+      const name = currentUserData?.name || custData?.contact_name || 'ลูกค้า';
+      const company = custData?.name || currentUserData?.company || '—';
+      document.getElementById('cust-name-display').textContent = name;
+      document.getElementById('cust-company-display').textContent = company;
+      document.getElementById('cust-company-sub').textContent = company;
+
+      const devSnap = await db.collection('devices').where('location','==', company).get()
+        .catch(() => db.collection('devices').get());
+
+      const devList = document.getElementById('cust-devices-list');
+      const homeDevList = document.getElementById('cust-home-devices');
+      if (devList) devList.innerHTML = '';
+      if (homeDevList) homeDevList.innerHTML = '';
+
+      let totalOutput = 0;
+      let deviceCount = 0;
+
+      devSnap.forEach(doc => {
+        const d = doc.data();
+        deviceCount++;
+        totalOutput += parseFloat(d.output_kw) || 0;
+        const stBadge = d.status==='running'?'badge-green':'badge-red';
+        const stText = d.status==='running'?'● Running':'Offline';
+        const card = `<div class="device-card">
+          <div class="device-header"><div><div class="device-name">${d.model||'—'}</div><div class="device-serial">Serial: ${d.serial||'—'} • ${d.zone||'—'}</div></div><span class="badge ${stBadge}">${stText}</span></div>
+          <div class="device-metrics">
+            <div class="metric"><div class="metric-val" style="color:var(--accent);">${d.output_kw||'—'}kW</div><div class="metric-label">Output</div></div>
+            <div class="metric"><div class="metric-val">${d.temperature||'—'}°C</div><div class="metric-label">Temp</div></div>
+            <div class="metric"><div class="metric-val" style="color:var(--info);">${d.load_percent||'—'}%</div><div class="metric-label">Load</div></div>
+          </div>
+        </div>`;
+        if (devList) devList.innerHTML += card;
+        if (homeDevList) homeDevList.innerHTML += card;
+      });
+
+      if (devList && devList.innerHTML === '') devList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
+      if (homeDevList && homeDevList.innerHTML === '') homeDevList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
+
+      // คำนวณจำลอง Metrics การประหยัดพลังงานอ้างอิงจาก Output เครื่อง
+      if(deviceCount > 0) {
+        document.getElementById('cust-co2').textContent = (totalOutput * 0.45).toFixed(1) + ' kg';
+        document.getElementById('cust-savings').textContent = '฿ ' + Math.round(totalOutput * 4.2).toLocaleString();
+        document.getElementById('cust-eff').textContent = '94.2%';
+      }
+
+      const fee = parseFloat(custData?.monthly_fee) || 0;
+      document.getElementById('cust-due').textContent = '฿ ' + fee.toLocaleString();
+      document.getElementById('cust-due-amount').textContent = '฿ ' + fee.toLocaleString();
+
+      const paySnap = await db.collection('payments').where('customer_name','==',company).get()
+        .catch(() => ({ forEach: ()=>{} }));
+      const txList = document.getElementById('cust-tx-list');
+      if (txList) txList.innerHTML = '';
+      paySnap.forEach && paySnap.forEach(doc => {
+        const d = doc.data();
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `<div class="item-info"><div class="item-title">${d.ref||'—'}</div><div class="item-sub">${d.date||'—'}</div></div><div class="item-right"><div class="item-amount">฿${parseFloat(d.amount).toLocaleString()}</div><div class="item-status" style="color:${d.status==='success'?'var(--accent)':'var(--warning)'};">${d.status==='success'?'✔ สำเร็จ':'⏳ รอ'}</div></div>`;
+        if (txList) txList.appendChild(el);
+      });
+
+      const tkSnap = await db.collection('tickets').where('customer_name','==',company).get()
+        .catch(() => ({ forEach: ()=>{} }));
+      const tkList = document.getElementById('cust-ticket-list');
+      if (tkList) tkList.innerHTML = '';
+      tkSnap.forEach && tkSnap.forEach(doc => {
+        const d = doc.data();
+        const stCls = d.status==='resolved'?'badge-green':'badge-yellow';
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `<div class="item-info"><div class="item-title">${d.title||'—'}</div><div class="item-sub">${d.created_date||'—'} • ${d.priority||'—'}</div></div><span class="badge ${stCls}">${d.status||'—'}</span>`;
+        if (tkList) tkList.appendChild(el);
+      });
+
+    } catch(e) { console.error('loadCustomerData:', e); }
+    finally { overlay.classList.remove('show'); }
+  }
+
+  // ══ ONBOARDING ══
+  async function submitOnboarding() {
+    const company = document.getElementById('ob-company').value.trim();
+    const tax = document.getElementById('ob-tax').value.trim();
+    const contact = document.getElementById('ob-contact').value.trim();
+    const phone = document.getElementById('ob-phone').value.trim();
+    const pkg = document.getElementById('ob-pkg').value;
+    const date = document.getElementById('ob-date').value;
+    const email = document.getElementById('ob-email').value.trim();
+    const pass = document.getElementById('ob-pass').value;
+    if (!company) { showToast('⚠️','ข้อมูลไม่ครบ','กรุณากรอกชื่อบริษัท'); return; }
+    try {
+      const data = {
+        name: company, tax_id: tax, contact_name: contact, phone, package: pkg,
+        install_date: date, email, status: 'pending',
+        dealer_id: currentDealerId || sessionStorage.getItem('tv_ref') || '—',
+        created_at: new Date().toISOString()
+      };
+      if (email && pass) {
+        try {
+          const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + firebaseConfig.apiKey,
+            { method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ email, password: pass, returnSecureToken: true }) });
+          const result = await res.json();
+          if (!result.error) {
+            data.uid = result.localId;
+            await db.collection('user_roles').doc(result.localId).set({
+              role: 'customer', email, company, created_at: new Date().toISOString()
+            });
+          }
+        } catch(e) { console.error('auth create:', e); }
+      }
+      await db.collection('customers').add(data);
+      showToast('✅','บันทึกสำเร็จ!', company);
+      ['ob-company','ob-tax','ob-contact','ob-phone','ob-email','ob-pass'].forEach(id => document.getElementById(id).value='');
+      await loadDealerData(auth.currentUser);
+      navTo('dealer','customers', document.querySelectorAll('#screen-dealer .nav-item')[1]);
+    } catch(e) { showToast('❌','เกิดข้อผิดพลาด', e.message); }
+  }
+
+  // ══ TICKET ══
+  async function submitTicket() {
+    const type = document.getElementById('tk-type').value;
+    const desc = document.getElementById('tk-desc').value;
+    const company = currentUserData?.company || '—';
+    try {
+      await db.collection('tickets').add({
+        title: type, description: desc, customer_name: company,
+        priority: 'Medium', status: 'open',
+        created_date: new Date().toISOString().slice(0,10),
+        submitted_by: currentRole, created_at: new Date().toISOString()
+      });
+      closeModal('modal-ticket');
+      showToast('✅','ส่งแจ้งปัญหาสำเร็จ!', type);
+      document.getElementById('tk-desc').value = '';
+    } catch(e) { showToast('❌','เกิดข้อผิดพลาด', e.message); }
+  }
+
+  // ══ SLIP / PAYMENT ══
+  function handleSlipPreview(input) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('pay-slip-preview').src = e.target.result;
+      document.getElementById('pay-slip-preview-wrap').style.display = 'block';
+      document.getElementById('pay-slip-icon').textContent = '✅';
+      document.getElementById('pay-slip-label').textContent = input.files[0].name;
+      window._paySlipB64 = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  function handleCustSlip(input) {
+    if (!input.files[0]) return;
+    if (input.files[0].size > 1.5*1024*1024) { showToast('⚠️','รูปใหญ่เกิน','ใช้ไม่เกิน 1.5MB'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('cust-slip-prev').src = e.target.result;
+      document.getElementById('cust-slip-prev-wrap').style.display = 'block';
+      document.getElementById('cust-slip-icon').textContent = '✅';
+      document.getElementById('cust-slip-label').textContent = input.files[0].name;
+      document.getElementById('cust-slip-actions').style.display = 'block';
+      window._custSlipB64 = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  async function submitCustSlip() {
+    if (!window._custSlipB64) { showToast('⚠️','ไม่มีรูป',''); return; }
+    const note = document.getElementById('cust-slip-note').value;
+    try {
+      await db.collection('photos').add({
+        image_base64: window._custSlipB64, type: 'payment_slip',
+        job: 'Payment Slip', note,
+        customer: currentUserData?.company || '—',
+        status: 'pending', submitted_by: 'customer',
+        submitted_at: new Date().toISOString()
+      });
+      showToast('📤','ส่งสลิปสำเร็จ!','HQ จะยืนยันเร็วๆ นี้');
+      window._custSlipB64 = null;
+      document.getElementById('cust-slip-actions').style.display = 'none';
+      document.getElementById('cust-slip-prev-wrap').style.display = 'none';
+    } catch(e) { showToast('❌','ส่งไม่สำเร็จ', e.message); }
+  }
+
+  async function submitCustModalSlip() {
+    if (!window._paySlipB64) { showToast('⚠️','ไม่มีรูปภาพสลิป','กรุณาอัปโหลดไฟล์'); return; }
+    try {
+      await db.collection('photos').add({
+        image_base64: window._paySlipB64, type: 'payment_slip',
+        job: 'Portal Modal Payment', note: 'ส่งสลิปผ่านทาง Modal ชำระเงิน Quick Pay',
+        customer: currentUserData?.company || '—',
+        status: 'pending', submitted_by: 'customer',
+        submitted_at: new Date().toISOString()
+      });
+      closeModal('modal-pay');
+      showToast('📤','ส่งสลิปสำเร็จ!','ระบบบันทึกคิวเรียบร้อย');
+      window._paySlipB64 = null;
+      document.getElementById('pay-slip-preview-wrap').style.display = 'none';
+    } catch(e) { showToast('❌','ระบบขัดข้อง', e.message); }
+  }
+
+  function handleDealerSlip(input) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('dp-preview').src = e.target.result;
+      document.getElementById('dp-preview-wrap').style.display = 'block';
+      document.getElementById('dp-slip-icon').textContent = '✅';
+      document.getElementById('dp-slip-label').textContent = input.files[0].name;
+      window._dpSlipB64 = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  async function submitDealerPayment() {
+    const payFor = document.getElementById('dp-for').value;
+    const amount = parseFloat(document.getElementById('dp-amount').value);
+    const date = document.getElementById('dp-date').value;
+    if (!payFor || !amount) { showToast('⚠️','ข้อมูลไม่ครบ',''); return; }
+    try {
+      const ref = 'PAY-' + Date.now().toString().slice(-6);
+      await db.collection('payments').add({
+        customer_name: payFor, amount: String(amount), ref, date,
+        status: 'pending', dealer_id: currentDealerId || '—',
+        image_base64: window._dpSlipB64 || null,
+        created_at: new Date().toISOString()
+      });
+      showToast('💳','ส่งการชำระสำเร็จ!', payFor + ' ฿' + amount.toLocaleString());
+      document.getElementById('dp-amount').value = '';
+      document.getElementById('dp-preview-wrap').style.display = 'none';
+      window._dpSlipB64 = null;
+    } catch(e) { showToast('❌','เกิดข้อผิดพลาด', e.message); }
+  }
+
+  // ══ MONITOR ══
+  function toggleMonitor(page) {
+    const el = document.getElementById('monitor-' + page + '-embed');
+    if (!el) return;
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    if (el.style.display === 'block') el.scrollIntoView({behavior:'smooth'});
+  }
+
+  // ══ REFERRAL ══
+  function copyLink() {
+    const link = window._refLink || document.getElementById('ref-link-text').textContent;
+    navigator.clipboard.writeText(link).then(() => showToast('📋','คัดลอกแล้ว!','')).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = link; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      showToast('📋','คัดลอกแล้ว!','');
+    });
+  }
+
+  // ══ ELECTRIC ANIMATION ══
+  (function() {
+    const canvas = document.getElementById('electric-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    const particles = Array.from({length:50}, () => ({ reset() { this.x=Math.random()*W; this.y=H+10; this.vx=(Math.random()-.5)*1.5; this.vy=-(Math.random()*2+1); this.size=Math.random()*3+1; this.life=Math.random(); this.decay=Math.random()*.008+.004; }, update() { this.x+=this.vx+Math.sin(Date.now()*.001+this.y*.01)*.5; this.y+=this.vy; this.life-=this.decay; if(this.life<=0||this.y<-10)this.reset(); }, draw() { ctx.save(); ctx.globalAlpha=this.life*.8; const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size*3); g.addColorStop(0,'hsl(150,100%,60%)'); g.addColorStop(1,'transparent'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(this.x,this.y,this.size*3,0,Math.PI*2); ctx.fill(); ctx.restore(); } })).map(p => { p.reset(); return p; });
+    const traces = Array.from({length:12}, () => ({ reset() { this.y=Math.random()*H; this.x=-50; this.speed=Math.random()*2+1; this.len=Math.random()*120+60; this.alpha=Math.random()*.3+.1; }, update() { this.x+=this.speed; if(this.x>W+50)this.reset(); }, draw() { const g=ctx.createLinearGradient(this.x-this.len,this.y,this.x,this.y); g.addColorStop(0,'transparent'); g.addColorStop(.5,'#2ecc71'); g.addColorStop(1,'transparent'); ctx.save(); ctx.strokeStyle=g; ctx.globalAlpha=this.alpha; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(this.x-this.len,this.y); ctx.lineTo(this.x,this.y); ctx.stroke(); ctx.restore(); } })).map(t => { t.reset(); return t; });
+    function animate() {
+      const login = document.getElementById('screen-login');
+      if (!login || !login.classList.contains('active')) { ctx.clearRect(0,0,W,H); requestAnimationFrame(animate); return; }
+      ctx.clearRect(0,0,W,H);
+      ctx.save(); ctx.strokeStyle='rgba(46,204,113,0.03)'; ctx.lineWidth=1;
+      for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+      for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+      ctx.restore();
+      particles.forEach(p=>{p.update();p.draw();});
+      traces.forEach(t=>{t.update();t.draw();});
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
+</script>
+</body>
+</html>
