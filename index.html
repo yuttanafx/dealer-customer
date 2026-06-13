@@ -572,4 +572,468 @@
       document.getElementById('dealer-bottom-nav').style.display = 'block';
       await loadDealerData(user);
     } else {
-      document.getElementById('
+      document.getElementById('customer-mobile-header').style.display = 'flex';
+      document.getElementById('customer-bottom-nav').style.display = 'block';
+      await loadCustomerData(user);
+    }
+    window.scrollTo(0,0);
+  }
+
+  // ══ LOGIN ══
+  function selectRole(role) {
+    selectedRole = role;
+    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('role-' + role).classList.add('selected');
+  }
+
+  // (รักษาระบบฟังก์ชันความปลอดภัยและการ Login ไว้ครบถ้วน)
+  function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    const btn = document.getElementById('login-btn');
+    if (!selectedRole) { errEl.textContent = '⚠️ กรุณาเลือกประเภทก่อน'; errEl.style.display='block'; return; }
+    if (!email || !pass) { errEl.textContent = '⚠️ กรุณากรอก Email และรหัสผ่าน'; errEl.style.display='block'; return; }
+    btn.textContent = 'กำลังเข้าระบบ...'; btn.disabled = true; errEl.style.display='none';
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(() => { btn.textContent = 'เข้าสู่ระบบ →'; btn.disabled = false; })
+      .catch(err => {
+        btn.textContent = 'เข้าสู่ระบบ →'; btn.disabled = false;
+        let msg = '❌ Email หรือรหัสผ่านไม่ถูกต้อง';
+        if (err.code === 'auth/too-many-requests') msg = '⚠️ ลองใหม่ภายหลัง';
+        errEl.textContent = msg; errEl.style.display='block';
+      });
+  }
+
+  function doLogout() {
+    selectedRole = null; currentRole = null; currentDealerId = null;
+    auth.signOut().then(() => {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-login').classList.add('active');
+      document.querySelectorAll('.mobile-header, .bottom-nav').forEach(el => el.style.display = 'none');
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+      document.getElementById('login-error').style.display = 'none';
+    });
+  }
+
+  function navTo(portal, page, el) {
+    document.querySelectorAll('#screen-' + portal + ' .page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('#screen-' + portal + ' .nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(portal + '-page-' + page).classList.add('active');
+    if (el) el.classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  function toggleDark() {
+    const isLight = document.body.classList.toggle('light-mode');
+    localStorage.setItem('tv_theme', isLight ? 'light' : 'dark');
+    document.querySelectorAll('.btn-icon, .mobile-btn-icon').forEach(btn => {
+      if (btn.textContent === '🌙' || btn.textContent === '☀️') btn.textContent = isLight ? '☀️' : '🌙';
+    });
+  }
+
+  let toastTimer;
+  function showToast(icon, title, sub) {
+    clearTimeout(toastTimer);
+    document.getElementById('toast-icon').textContent = icon;
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-sub').textContent = sub;
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+
+  // ══ DEALER DATA ══
+  async function loadDealerData(user) {
+    const overlay = document.getElementById('loading-overlay');
+    overlay.classList.add('show');
+    try {
+      let dealerName = currentUserData?.name || 'Dealer';
+      let dealerId = currentDealerId;
+
+      if (!dealerId) {
+        const dlSnap = await db.collection('dealers').where('uid','==',user.uid).limit(1).get();
+        if (!dlSnap.empty) {
+          dealerId = dlSnap.docs[0].data().dealer_id;
+          dealerName = dlSnap.docs[0].data().name || dealerName;
+          currentDealerId = dealerId;
+        }
+      }
+
+      if (dealerId) {
+        document.getElementById('dealer-id-display').textContent = 'ID: ' + dealerId;
+        document.getElementById('dealer-id-big').textContent = dealerId;
+        const refLink = window.location.origin + window.location.pathname + '?ref=' + dealerId;
+        document.getElementById('ref-link-text').textContent = refLink;
+        window._refLink = refLink;
+      }
+      document.getElementById('dealer-name-display').textContent = dealerName;
+      document.getElementById('dealer-company-sub').textContent = dealerName;
+
+      let custQuery = db.collection('customers');
+      if (dealerId) custQuery = custQuery.where('dealer_id','==',dealerId);
+      const custSnap = await custQuery.get();
+      renderDealerCustomers(custSnap);
+
+      let paySnap;
+      if (dealerId) {
+        paySnap = await db.collection('payments').where('dealer_id','==',dealerId).get().catch(() => db.collection('payments').get());
+      } else {
+        paySnap = await db.collection('payments').get();
+      }
+      let total = 0, pending = 0;
+      const walletList = document.getElementById('d-wallet-list');
+      if (walletList) walletList.innerHTML = '';
+      paySnap.forEach(doc => {
+        const d = doc.data();
+        const amt = parseFloat(d.amount) || 0;
+        if (d.status === 'success') total += amt; else pending += amt;
+        if (walletList) {
+          const el = document.createElement('div');
+          el.className = 'list-item';
+          el.innerHTML = `<div class="item-info"><div class="item-title">${d.customer_name||'—'}</div><div class="item-sub">Ref: ${d.ref||'—'} • ${d.date||'—'}</div></div><div class="item-right"><div class="item-amount">+ ฿${amt.toLocaleString()}</div><div class="item-status" style="color:${d.status==='success'?'var(--accent)':'var(--warning)'};">${d.status==='success'?'✔ สำเร็จ':'⏳ รอ'}</div></div>`;
+          walletList.appendChild(el);
+        }
+      });
+      document.getElementById('d-commission').textContent = '฿ ' + total.toLocaleString();
+      document.getElementById('d-pending').textContent = '฿ ' + pending.toLocaleString();
+      document.getElementById('d-wallet-total').textContent = '฿ ' + total.toLocaleString();
+      document.getElementById('d-wallet-pending').textContent = '฿ ' + pending.toLocaleString();
+
+      const tkSnap = await db.collection('tickets').get();
+      const tkList = document.getElementById('d-ticket-list');
+      if (tkList) tkList.innerHTML = '';
+      tkSnap.forEach(doc => {
+        const d = doc.data();
+        const stClass = d.status==='open'?'badge-green':d.status==='resolved'?'badge-gray':'badge-yellow';
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `<div class="item-info"><div class="item-title">${d.title||'—'}</div><div class="item-sub">${d.customer_name||'—'} • ${d.created_date||'—'}</div></div><span class="badge ${stClass}">${d.status||'—'}</span>`;
+        if (tkList) tkList.appendChild(el);
+      });
+
+    } catch(e) { console.error('loadDealerData:', e); }
+    finally { overlay.classList.remove('show'); }
+  }
+
+  function renderDealerCustomers(snap) {
+    const listEl = document.getElementById('d-customers-list');
+    const dashEl = document.getElementById('d-dash-customers');
+    const dpFor = document.getElementById('dp-for');
+    if (dpFor) dpFor.innerHTML = '';
+    let html = '';
+    let count = 0;
+    if (snap && !snap.empty) {
+      snap.forEach(doc => {
+        count++;
+        const d = doc.data();
+        const ini = (d.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        const cls = ['av-blue','av-teal','av-green'][count%3];
+        const stCls = d.status==='active'?'badge-green':'badge-yellow';
+        html += `<div class="list-item"><div class="item-avatar ${cls}">${ini}</div><div class="item-info"><div class="item-title">${d.name||'—'}</div><div class="item-sub">${d.package||'—'} • ${d.install_date||'—'}</div></div><span class="badge ${stCls}">${d.status==='active'?'Active':'Pending'}</span></div>`;
+        if (dpFor) dpFor.add(new Option(d.name, d.name));
+      });
+    } else {
+      html = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">ยังไม่มีลูกค้า</div>';
+    }
+    if (listEl) listEl.innerHTML = html;
+    if (dashEl) dashEl.innerHTML = html;
+    document.getElementById('d-client-count').textContent = count;
+    document.getElementById('d-client-bar').style.width = Math.min(100, count*5) + '%';
+  }
+
+  // ══ CUSTOMER DATA ══
+  async function loadCustomerData(user) {
+    const overlay = document.getElementById('loading-overlay');
+    overlay.classList.add('show');
+    try {
+      let custData = null;
+      const snap = await db.collection('customers').where('uid','==',user.uid).limit(1).get();
+      if (!snap.empty) {
+        custData = snap.docs[0].data();
+      } else {
+        const snap2 = await db.collection('customers').where('email','==',user.email).limit(1).get();
+        if (!snap2.empty) custData = snap2.docs[0].data();
+      }
+
+      const name = currentUserData?.name || custData?.contact_name || 'ลูกค้า';
+      const company = custData?.name || currentUserData?.company || '—';
+      document.getElementById('cust-name-display').textContent = name;
+      document.getElementById('cust-company-display').textContent = company;
+      document.getElementById('cust-company-sub').textContent = company;
+
+      const devSnap = await db.collection('devices').where('location','==', company).get()
+        .catch(() => db.collection('devices').get());
+
+      const devList = document.getElementById('cust-devices-list');
+      const homeDevList = document.getElementById('cust-home-devices');
+      if (devList) devList.innerHTML = '';
+      if (homeDevList) homeDevList.innerHTML = '';
+
+      let totalOutput = 0;
+      let deviceCount = 0;
+
+      devSnap.forEach(doc => {
+        const d = doc.data();
+        deviceCount++;
+        totalOutput += parseFloat(d.output_kw) || 0;
+        const stBadge = d.status==='running'?'badge-green':'badge-red';
+        const stText = d.status==='running'?'● Running':'Offline';
+        const card = `<div class="device-card">
+          <div class="device-header"><div><div class="device-name">${d.model||'—'}</div><div class="device-serial">Serial: ${d.serial||'—'} • ${d.zone||'—'}</div></div><span class="badge ${stBadge}">${stText}</span></div>
+          <div class="device-metrics">
+            <div class="metric"><div class="metric-val" style="color:var(--accent);">${d.output_kw||'—'}kW</div><div class="metric-label">Output</div></div>
+            <div class="metric"><div class="metric-val">${d.temperature||'—'}°C</div><div class="metric-label">Temp</div></div>
+            <div class="metric"><div class="metric-val" style="color:var(--info);">${d.load_percent||'—'}%</div><div class="metric-label">Load</div></div>
+          </div>
+        </div>`;
+        if (devList) devList.innerHTML += card;
+        if (homeDevList) homeDevList.innerHTML += card;
+      });
+
+      if (devList && devList.innerHTML === '') devList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
+      if (homeDevList && homeDevList.innerHTML === '') homeDevList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
+
+      // คำนวณสรุปค่าจำลองพลังงานเข้าหน้าแรก
+      if(deviceCount > 0) {
+        document.getElementById('cust-co2').textContent = (totalOutput * 0.45).toFixed(1) + ' kg';
+        document.getElementById('cust-savings').textContent = '฿ ' + Math.round(totalOutput * 4.2).toLocaleString();
+        document.getElementById('cust-eff').textContent = '94.2%';
+      }
+
+      const fee = parseFloat(custData?.monthly_fee) || 0;
+      document.getElementById('cust-due').textContent = '฿ ' + fee.toLocaleString();
+      document.getElementById('cust-due-amount').textContent = '฿ ' + fee.toLocaleString();
+
+      const paySnap = await db.collection('payments').where('customer_name','==',company).get()
+        .catch(() => ({ forEach: ()=>{} }));
+      const txList = document.getElementById('cust-tx-list');
+      if (txList) txList.innerHTML = '';
+      paySnap.forEach && paySnap.forEach(doc => {
+        const d = doc.data();
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `<div class="item-info"><div class="item-title">${d.ref||'—'}</div><div class="item-sub">${d.date||'—'}</div></div><div class="item-right"><div class="item-amount">฿${parseFloat(d.amount).toLocaleString()}</div><div class="item-status" style="color:${d.status==='success'?'var(--accent)':'var(--warning)'};">${d.status==='success'?'✔ สำเร็จ':'⏳ รอ'}</div></div>`;
+        if (txList) txList.appendChild(el);
+      });
+
+      const tkSnap = await db.collection('tickets').where('customer_name','==',company).get()
+        .catch(() => ({ forEach: ()=>{} }));
+      const tkList = document.getElementById('cust-ticket-list');
+      if (tkList) tkList.innerHTML = '';
+      tkSnap.forEach && tkSnap.forEach(doc => {
+        const d = doc.data();
+        const stCls = d.status==='resolved'?'badge-green':'badge-yellow';
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `<div class="item-info"><div class="item-title">${d.title||'—'}</div><div class="item-sub">${d.created_date||'—'} • ${d.priority||'—'}</div></div><span class="badge ${stCls}">${d.status||'—'}</span>`;
+        if (tkList) tkList.appendChild(el);
+      });
+
+    } catch(e) { console.error('loadCustomerData:', e); }
+    finally { overlay.classList.remove('show'); }
+  }
+
+  // ══ ONBOARDING ══
+  async function submitOnboarding() {
+    const company = document.getElementById('ob-company').value.trim();
+    const tax = document.getElementById('ob-tax').value.trim();
+    const contact = document.getElementById('ob-contact').value.trim();
+    const phone = document.getElementById('ob-phone').value.trim();
+    const pkg = document.getElementById('ob-pkg').value;
+    const date = document.getElementById('ob-date').value;
+    const email = document.getElementById('ob-email').value.trim();
+    const pass = document.getElementById('ob-pass').value;
+    if (!company) { showToast('⚠️','ข้อมูลไม่ครบ','กรุณากรอกชื่อบริษัท'); return; }
+    try {
+      const data = {
+        name: company, tax_id: tax, contact_name: contact, phone, package: pkg,
+        install_date: date, email, status: 'pending',
+        dealer_id: currentDealerId || sessionStorage.getItem('tv_ref') || '—',
+        created_at: new Date().toISOString()
+      };
+      if (email && pass) {
+        try {
+          const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + firebaseConfig.apiKey,
+            { method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ email, password: pass, returnSecureToken: true }) });
+          const result = await res.json();
+          if (!result.error) {
+            data.uid = result.localId;
+            await db.collection('user_roles').doc(result.localId).set({
+              role: 'customer', email, company, created_at: new Date().toISOString()
+            });
+          }
+        } catch(e) { console.error('auth create:', e); }
+      }
+      await db.collection('customers').add(data);
+      showToast('✅','บันทึกสำเร็จ!', company);
+      ['ob-company','ob-tax','ob-contact','ob-phone','ob-email','ob-pass'].forEach(id => document.getElementById(id).value='');
+      await loadDealerData(auth.currentUser);
+      navTo('dealer','customers', document.querySelectorAll('#screen-dealer .nav-item')[1]);
+    } catch(e) { showToast('❌','เกิดข้อผิดพลาด', e.message); }
+  }
+
+  // ══ TICKET ══
+  async function submitTicket() {
+    const type = document.getElementById('tk-type').value;
+    const desc = document.getElementById('tk-desc').value;
+    const company = currentUserData?.company || '—';
+    try {
+      await db.collection('tickets').add({
+        title: type, description: desc, customer_name: company,
+        priority: 'Medium', status: 'open',
+        created_date: new Date().toISOString().slice(0,10),
+        submitted_by: currentRole, created_at: new Date().toISOString()
+      });
+      closeModal('modal-ticket');
+      showToast('✅','ส่งแจ้งปัญหาสำเร็จ!', type);
+      document.getElementById('tk-desc').value = '';
+    } catch(e) { showToast('❌','เกิดข้อผิดพลาด', e.message); }
+  }
+
+  // ══ SLIP / PAYMENT ══
+  function handleSlipPreview(input) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('pay-slip-preview').src = e.target.result;
+      document.getElementById('pay-slip-preview-wrap').style.display = 'block';
+      document.getElementById('pay-slip-icon').textContent = '✅';
+      document.getElementById('pay-slip-label').textContent = input.files[0].name;
+      window._paySlipB64 = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  function handleCustSlip(input) {
+    if (!input.files[0]) return;
+    if (input.files[0].size > 1.5*1024*1024) { showToast('⚠️','รูปใหญ่เกิน','ใช้ไม่เกิน 1.5MB'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('cust-slip-prev').src = e.target.result;
+      document.getElementById('cust-slip-prev-wrap').style.display = 'block';
+      document.getElementById('cust-slip-icon').textContent = '✅';
+      document.getElementById('cust-slip-label').textContent = input.files[0].name;
+      document.getElementById('cust-slip-actions').style.display = 'block';
+      window._custSlipB64 = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  async function submitCustSlip() {
+    if (!window._custSlipB64) { showToast('⚠️','ไม่มีรูป',''); return; }
+    const note = document.getElementById('cust-slip-note').value;
+    try {
+      await db.collection('photos').add({
+        image_base64: window._custSlipB64, type: 'payment_slip',
+        job: 'Payment Slip', note,
+        customer: currentUserData?.company || '—',
+        status: 'pending', submitted_by: 'customer',
+        submitted_at: new Date().toISOString()
+      });
+      showToast('📤','ส่งสลิปสำเร็จ!','HQ จะยืนยันเร็วๆ นี้');
+      window._custSlipB64 = null;
+      document.getElementById('cust-slip-actions').style.display = 'none';
+      document.getElementById('cust-slip-prev-wrap').style.display = 'none';
+    } catch(e) { showToast('❌','ส่งไม่สำเร็จ', e.message); }
+  }
+
+  async function submitCustModalSlip() {
+    if (!window._paySlipB64) { showToast('⚠️','ไม่มีรูปภาพสลิป','กรุณาอัปโหลดไฟล์'); return; }
+    try {
+      await db.collection('photos').add({
+        image_base64: window._paySlipB64, type: 'payment_slip',
+        job: 'Portal Modal Payment', note: 'ส่งสลิปผ่านทาง Modal ชำระเงิน Quick Pay',
+        customer: currentUserData?.company || '—',
+        status: 'pending', submitted_by: 'customer',
+        submitted_at: new Date().toISOString()
+      });
+      closeModal('modal-pay');
+      showToast('📤','ส่งสลิปสำเร็จ!','ระบบบันทึกคิวเรียบร้อย');
+      window._paySlipB64 = null;
+      document.getElementById('pay-slip-preview-wrap').style.display = 'none';
+    } catch(e) { showToast('❌','ระบบขัดข้อง', e.message); }
+  }
+
+  function handleDealerSlip(input) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('dp-preview').src = e.target.result;
+      document.getElementById('dp-preview-wrap').style.display = 'block';
+      document.getElementById('dp-slip-icon').textContent = '✅';
+      document.getElementById('dp-slip-label').textContent = input.files[0].name;
+      window._dpSlipB64 = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  async function submitDealerPayment() {
+    const payFor = document.getElementById('dp-for').value;
+    const amount = parseFloat(document.getElementById('dp-amount').value);
+    const date = document.getElementById('dp-date').value;
+    if (!payFor || !amount) { showToast('⚠️','ข้อมูลไม่ครบ',''); return; }
+    try {
+      const ref = 'PAY-' + Date.now().toString().slice(-6);
+      await db.collection('payments').add({
+        customer_name: payFor, amount: String(amount), ref, date,
+        status: 'pending', dealer_id: currentDealerId || '—',
+        image_base64: window._dpSlipB64 || null,
+        created_at: new Date().toISOString()
+      });
+      showToast('💳','ส่งการชำระสำเร็จ!', payFor + ' ฿' + amount.toLocaleString());
+      document.getElementById('dp-amount').value = '';
+      document.getElementById('dp-preview-wrap').style.display = 'none';
+      window._dpSlipB64 = null;
+    } catch(e) { showToast('❌','เกิดข้อผิดพลาด', e.message); }
+  }
+
+  // ══ MONITOR ══
+  function toggleMonitor(page) {
+    const el = document.getElementById('monitor-' + page + '-embed');
+    if (!el) return;
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    if (el.style.display === 'block') el.scrollIntoView({behavior:'smooth'});
+  }
+
+  // ══ REFERRAL ══
+  function copyLink() {
+    const link = window._refLink || document.getElementById('ref-link-text').textContent;
+    navigator.clipboard.writeText(link).then(() => showToast('📋','คัดลอกแล้ว!','')).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = link; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      showToast('📋','คัดลอกแล้ว!','');
+    });
+  }
+
+  // ══ ELECTRIC ANIMATION ══
+  (function() {
+    const canvas = document.getElementById('electric-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    const particles = Array.from({length:50}, () => ({ reset() { this.x=Math.random()*W; this.y=H+10; this.vx=(Math.random()-.5)*1.5; this.vy=-(Math.random()*2+1); this.size=Math.random()*3+1; this.life=Math.random(); this.decay=Math.random()*.008+.004; }, update() { this.x+=this.vx+Math.sin(Date.now()*.001+this.y*.01)*.5; this.y+=this.vy; this.life-=this.decay; if(this.life<=0||this.y<-10)this.reset(); }, draw() { ctx.save(); ctx.globalAlpha=this.life*.8; const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size*3); g.addColorStop(0,'hsl(150,100%,60%)'); g.addColorStop(1,'transparent'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(this.x,this.y,this.size*3,0,Math.PI*2); ctx.fill(); ctx.restore(); } })).map(p => { p.reset(); return p; });
+    const traces = Array.from({length:12}, () => ({ reset() { this.y=Math.random()*H; this.x=-50; this.speed=Math.random()*2+1; this.len=Math.random()*120+60; this.alpha=Math.random()*.3+.1; }, update() { this.x+=this.speed; if(this.x>W+50)this.reset(); }, draw() { const g=ctx.createLinearGradient(this.x-this.len,this.y,this.x,this.y); g.addColorStop(0,'transparent'); g.addColorStop(.5,'#2ecc71'); g.addColorStop(1,'transparent'); ctx.save(); ctx.strokeStyle=g; ctx.globalAlpha=this.alpha; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(this.x-this.len,this.y); ctx.lineTo(this.x,this.y); ctx.stroke(); ctx.restore(); } })).map(t => { t.reset(); return t; });
+    function animate() {
+      const login = document.getElementById('screen-login');
+      if (!login || !login.classList.contains('active')) { ctx.clearRect(0,0,W,H); requestAnimationFrame(animate); return; }
+      ctx.clearRect(0,0,W,H);
+      ctx.save(); ctx.strokeStyle='rgba(46,204,113,0.03)'; ctx.lineWidth=1;
+      for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+      for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+      ctx.restore();
+      particles.forEach(p=>{p.update();p.draw();});
+      traces.forEach(t=>{t.update();t.draw();});
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
+</script>
+</body>
+</html>
