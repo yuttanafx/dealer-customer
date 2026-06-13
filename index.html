@@ -7,7 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2=family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg:#0a0f0d; --surface:#111916; --surface2:#182320; --border:#1e2e28;
@@ -23,7 +23,7 @@
     #screen-login{align-items:center;justify-content:center;flex-direction:column;}
     .login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:380px;max-width:95vw;position:relative;z-index:2;}
     .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center;}
-    .login-logo img{width:44px;height:44px;object-fit:contain;background:white;border-radius:10px;padding:3px;}
+    .login-logo img{height:54px;object-fit:contain;background:transparent;border-radius:10px;padding:3px;}
     .login-logo-text{font-weight:800;font-size:18px;}
     .login-logo-text span{color:var(--accent);font-size:12px;font-weight:400;display:block;}
     .login-title{font-weight:800;font-size:20px;margin-bottom:6px;text-align:center;}
@@ -49,7 +49,7 @@
     .portal{display:flex;width:100%;min-height:100vh;}
     .sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;position:fixed;top:0;left:0;bottom:0;z-index:100;}
     .logo{display:flex;align-items:center;gap:10px;padding:0 22px 28px;border-bottom:1px solid var(--border);}
-    .logo img{width:30px;height:30px;object-fit:contain;background:white;border-radius:6px;padding:2px;flex-shrink:0;}
+    .logo img{height:32px;object-fit:contain;background:transparent;flex-shrink:0;}
     .logo-text{font-weight:800;font-size:13px;line-height:1.2;}
     .logo-text span{color:var(--accent);display:block;font-size:11px;font-weight:400;}
     nav{flex:1;padding:18px 12px;display:flex;flex-direction:column;gap:2px;}
@@ -106,7 +106,7 @@
     .item-status{font-size:11px;color:var(--muted);margin-top:2px;}
     .btn-sm{font-size:11px;padding:4px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;transition:.15s;}
     .btn-sm:hover{border-color:var(--accent);color:var(--accent);}
-    .btn-primary{padding:11px 22px;background:var(--accent);color:#0a0f0d;border:none;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;transition:.15s;}
+    .btn-primary{padding:11px 22px;background:var(--accent);color:#0a0f0d;border:none;border-radius:99px;font-weight:700;font-size:13px;cursor:pointer;transition:.15s;}
     .btn-primary:hover{background:var(--accent2);}
     .btn-outline{padding:7px 14px;background:transparent;border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;transition:.15s;}
     .btn-outline:hover{background:#1a3028;}
@@ -226,9 +226,9 @@
 <div class="screen active" id="screen-login">
   <div class="login-box">
     <div class="login-logo">
-      <img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" />
-      <div class="login-logo-text">Terravolt Eco<span>Partner & Customer Portal</span></div>
+      <img src="data:image/jpeg;base64,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" />
     </div>
+    <div class="login-logo-text" style="text-align:center; margin-bottom:15px;">Terravolt Eco<span style="color:var(--accent);">Partner & Customer Portal</span></div>
     <div class="login-title">Welcome</div>
     <div class="login-sub">เลือกประเภทผู้ใช้งาน</div>
     <div class="role-grid">
@@ -256,7 +256,7 @@
 <div class="screen" id="screen-dealer">
   <div class="mobile-header" id="dealer-mobile-header">
     <div class="mobile-header-logo">
-      <img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" style="width:28px;height:28px;border-radius:6px;" />
+      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCADIAKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKOrigkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAorJ8VeLNE8C+H73XfEesaf4f0SyTzLrUtUuo7a2t0zjc8jkKoyRySOtO8L+KtE8ceH7LXfDmsafr+iXqeZa6lpdVHc21wmcbo5EJVhkHkE0AatFFFABRRRQAUUUUAFFcxq/xS8GaB4v07wpqfi/QdO8U6kgez0S71OCG9uVJwDFCzh3BIwNoPIdv4R8Y/tf/t263p/ii9+EvwDs28QfEeRza3uqWkQufsMmMmG3Qgo0yjlnfMcYBBywbywD6H+LX7TXwz+B9vK3jHxZp+m3ipsTS4pPtF9MxxhUt4w0hzlfmICjIyw618yeJP8AgrP8K7X7dbWfw38feJ4ZIGRLiPSbWOzuNy8KxknEmxuAwMZOM8HpXEfs+/8ABKjTLuSPxp8etYvPFfifUG+1XGhRXjmFJGIbNzcq3mTvnduCsq9PmkHX7W8Kfs/fC3wHpR07w/8ADrwrpFmyBHjtNGt0MuAF3OwTMjYAy7EsepOeaAPyE+EPxw/Zv0X4k6Zret/sxXWlrb3QfztK8S3WqWiN0+bTriFUZOfuBmA7AkBq/ZvwzbeHY9Dsrzwpa6Za6Hfwx3trLo8EUdtPFKoeOVPLAVwylSG5yMcmuF8dfso/B/4kadLaa78N/D0pdi/wBrNwttdwM3VkmhZJEJ9m9PSuC8N/ALxb+yzpdzH8ErhPFHgnzjcSfDfxdqbD7NuOZP7OvwjNEcksYpldGOW3KWLEA+iaK8w+Ef7RHg34valfeH7Vbzw7470sbNW8F+IoPserWLAAnMJY+YgBH7yIunK5IJxXp9AHzh+3N+ydcftffCnSvB1r4oj8KSWGtRas11LYfbFmCQTReVs8yPGfOzu3HG3pzkT/ALDn7LNw/wB+E2qeEPFUfiyO/wBFi0ptVk0L7EsIWeWLzRH5smceTndtGN3fHMH/AUVWb65uL2W8lt4pbyaZrqSd4VdnkJ3bjgH5t2Tn1+gr9a/8gcuVf7B/H9KKKKACii品/2wF8C3m6+fQfAt5eL7h08N3k8m7OdwfztpB9Mce9e2UUUAFFFFABRRRQB/Mpw6+f9b+9wZ/8AasVp92b0Yf7Wz3Of3Xv7w/F3/D3/APaP+F/wr/4Rfxl4R0fxZrc2tNqSy63eJaJeQvBDGgjc8KShhcFCc/MoHVsYv/8Nf8Aw8+KHgv+wbS6utA18XN3cX/9s/Z1tNXa6t5be4TULSaGG2ut8crqWliZz8uWO1ccP+zf/wAExvhJ+zj4wh8Y6XLq3i7xlp3yWOs+Ipo5VsWKMkk0EESJGkrBmAdgzoD8rAkk/V9UAFFFFAH8ynwL+N37R/gn4m6bret/sxWurK3IdI8S3S6WieX1GnW8Ko75+4GYDsCQGr9lvDPw98Y+I9Bsrzxpa6Za6Hfwx3trLo8EUdtPFKoeOVPLAVwylSG5yMcmuF8dfso/B/4kadLaa78N/D0pdi/wBrNwttdwM3VkmhZJEJ9m9PSuC8N/ALxb+yzpdzH8ErhPFHgnzjcSfDfxdqbD7NuOZP7OvwjNEcksYpldGOW3KWLEA+iaK8w+Ef7RHg34valfeH7Vbzw7470sbNW8F+IoPserWLAAnMJY+YgBH7yIunK5IJxXp9AHzh+3N+ydcftffCnSvB1r4oj8KSWGtRas11LYfbFmCQTReVs8yPGfOzu3HG3pzkT/ALDn7LNw/wB+E2qeEPFUfiyO/wBFi0ptVk0L7EsIWeWLzRH5smceTndtGN3fHMH/AUVWb65uL2W8lt4pbyaZrqSd4VdnkJ3bjgH5t2Tn1+gr9a/8gcuVf7B/H9KKKKACii品/2wF8C3m6+fQfAt5eL7h08N3k8m7OdwfztpB9Mce9e2UUUAFFFFABRRRQB/Mpw6+f9b+9wZ/8AasVp92b0Yf7Wz3Of3Xv7w/F3/D3/APaP+F/wr/4Rfxl4R0fxZrc2tNqSy63eJaJeQvBDGgjc8KShhcFCc/MoHVsYv/8Nf8Aw8+KHgv+wbS6utA18XN3cX/9s/Z1tNXa6t5be4TULSaGG2ut8crqWliZz8uWO1ccP+zf/wAExvhJ+zj4wh8Y6XLq3i7xlp3yWOs+Ipo5VsWKMkk0EESJGkrBmAdgzoD8rAkk/V9UAFFFFAH8ynwL+N37R/gn4m6bret/sxWurK3IdI8S3S6WieX1GnW8Ko75+4GYDsCQGr9lvDPw98Y+I9Bsrzxpa6Za6Hfwx3trLo8EUdtPFKoeOVPLAVwylSG5yMcmuF8dfso/B/4kadLaa78N/D0pdi/wBrNwttdwM3VkmhZJEJ9m9PSuC8N/ALxb+yzpdzH8ErhPFHgnzjcSfDfxdqbD7NuOZP7OvwjNEcksYpldGOW3KWLEA+iaK8w+Ef7RHg34valfeH7Vbzw7470sbNW8F+IoPserWLAAnMJY+YgBH7yIunK5IJxXp9AHzh+3N+ydcftffCnSvB1r4oj8KSWGtRas11LYfbFmCQTReVs8yPGfOzu3HG3pzkT/ALDn7LNw/wB+E2qeEPFUfiyO/wBFi0ptVk0L7EsIWeWLzRH5smceTndtGN3fHMH/AUVWb65uL2W8lt4pbyaZrqSd4VdnkJ3bjgH5t2Tn1+gr9a/8gcuVf7B/H9KKKKACii品/2wF8C3m6+fQfAt5eL7h08N3k8m7OdwfztpB9Mce9e2UUUAFFFFABRRRQB/Mpw6+f9b+9wZ/8AasVp92b0Yf7Wz3Of3Xv7w/F3/D3/APaP+F/wr/4Rfxl4R0fxZrc2tNqSy63eJaJeQvBDGgjc8KShhcFCc/MoHVsYv/8Nf8Aw8+KHgv+wbS6utA18XN3cX/9s/Z1tNXa6t5be4TULSaGG2ut8crqWliZz8uWO1ccP+zf/wAExvhJ+zj4wh8Y6XLq3i7xlp3yWOs+Ipo5VsWKMkk0EESJGkrBmAdgzoD8rAkk/V9UAFFFFAH8ynwL+N37R/gn4m6bret/sxWurK3IdI8S3S6WieX1GnWึคื้" style="height:26px; width:auto;" />
       <div><div class="mobile-header-title">Partner Portal</div><div class="mobile-header-sub" id="dealer-company-sub">—</div></div>
     </div>
     <div class="mobile-header-actions">
@@ -275,7 +275,7 @@
   </nav>
   <div class="portal">
     <aside class="sidebar">
-      <div class="logo"><img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" /><div class="logo-text">Terravolt Eco<span>Partner Portal</span></div></div>
+      <div class="logo"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCADIAKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKOrigkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAorJ8VeLNE8C+H73XfEesaf4f0SyTzLrUtUuo7a2t0zjc8jkKoyRySOtO8L+KtE8ceH7LXfDmsafr+iXqeZa6lpdVHc21wmcbo5EJVhkHkE0AatFFFABRRRQAUUUUAFFcxq/xS8GaB4v07wpqfi/QdO8U6kgez0S71OCG9uVJwDFCzh3BIwNoPIdv4R8Y/tf/t263p/ii9+EvwDs28QfEeRza3uqWkQufsMmMmG3Qgo0yjlnfMcYBBywbywD6H+LX7TXwz+B9vK3jHxZp+m3ipsTS4pPtF9MxxhUt4w0hzlfmICjIyw618yeJP8AgrP8K7X7dbWfw38feJ4ZIGRLiPSbWOzuNy8KxknEmxuAwMZOM8HpXEfs+/8ABKjTLuSPxp8etYvPFfifUG+1XGhRXjmFJGIbNzcq3mTvnduCsq9PmkHX7W8Kfs/fC3wHpR07w/8ADrwrpFmyBHjtNGt0MuAF3OwTMjYAy7EsepOeaAPyE+EPxw/Zv0X4k6Zret/sxXWlrb3QfztK8S3WqWiN0+bTriFUZOfuBmA7AkBq/ZvwzbeHY9Dsrzwpa6Za6Hfwx3trLo8EUdtPFKoeOVPLAVwylSG5yMcmuF8dfso/B/4kadLaa78N/D0pdi/wBrNwttdwM3VkmhZJEJ9m9PSuC8N/ALxb+yzpdzH8ErhPFHgnzjcSfDfxdqbD7NuOZP7OvwjNEcksYpldGOW3KWLEA+iaK8w+Ef7RHg34valfeH7Vbzw7470sbNW8F+IoPserWLAAnMJY+YgBH7yIunK5IJxXp9AHzh+3N+ydcftffCnSvB1r4oj8KSWGtRas11LYfbFmCQTReVs8yPGfOzu3HG3pzkT/ALDn7LNw/wB+E2qeEPFUfiyO/wBFi0ptVk0L7EsIWeWLzRH5smceTndtGN3fHMH/AUVWb65uL2W8lt4pbyaZrqSd4VdnkJ3bjgH5t2Tn1+gr9a/8gcuVf7B/H9KKKKACii品/2wF8C3m6+fQfAt5eL7h08N3k8m7OdwfztpB9Mce9e2UUUAFFFFAB烈" style="height:35px; width:auto;" /><div class="logo-text">Terravolt Eco<span>Partner Portal</span></div></div>
       <nav>
         <div class="nav-label">Main</div>
         <div class="nav-item active" onclick="navTo('dealer','dashboard',this)"><span class="nav-icon">📊</span> Dashboard</div>
@@ -397,7 +397,7 @@
 <div class="screen" id="screen-customer">
   <div class="mobile-header" id="customer-mobile-header">
     <div class="mobile-header-logo">
-      <img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" style="width:28px;height:28px;border-radius:6px;" />
+      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCADIAKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKOrigkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oAMBAAIRAxEAPwD9U6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAorJ8VeLNE8C+H73XfEesaf4f0SyTzLrUtUuo7a2t0zjc8jkKoyRySOtO8L+KtE8ceH7LXfDmsafr+iXqeZa6lpdVHc21wmcbo5EJVhkHkE0AatFFFABRRRQAUUUUAFFcxq/xS8GaB4v07wpqfi/QdO8U6kgez0S71OCG9uVJwDFCzh3BIwNoPIdv4R8Y/tf/t263p/ii9+EvwDs28QfEeRza3uqWkQufsMmMmG3Qgo0yjlnfMcYBBywbywD6H+LX7TXwz+B9vK3jHxZp+m3ipsTS4pPtF9MxxhUt4w0hzlfmICjIyw618yeJP8AgrP8K7X7dbWfw38feJ4ZIGRLiPSbWOzuNy8KxknEmxuAwMZOM8HpXEfs+/8ABKjTLuSPxp8etYvPFfifUG+1XGhRXjmFJGIbNzcq3mTvnduCsq9PmkHX7W8Kfs/fC3wHpR07w/8ADrwrpFmyBHjtNGt0MuAF3OwTMjYAy7EsepOeaAPyE+EPxw/Zv0X4k6Zret/sxXWlrb3QfztK8S3WqWiN0+bTriFUZOfuBmA7AkBq/ZvwzbeHY9Dsrzwpa6Za6Hfwx3trLo8EUdtPFKoeOVPLAVwylSG5yMcmuF8dfso/B/4kadLaa78N/D0pdi/wBrNwttdwM3VkmhZJEJ9m9PSuC8N/ALxb+yzpdzH8ErhPFHgnzjcSfDfxdqbD7NuOZP7OvwjNEcksYpldGOW3KWLEA+iaK8w+Ef7RHg34valfeH7Vbzw7470sbNW8F+IoPserWLAAnMJY+YgBH7yIunK5IJxXp9AHzh+3N+ydcftffCnSvB1r4oj8KSWGtRas11LYfbFmCQTReVs8yPGfOzu3HG3pzkT/ALDn7LNw/wB+E2qeEPFUfiyO/wBFi0ptVk0L7EsIWeWLzRH5smceTndtGN3fHMH/AUVWb65uL2W8lt4pbyaZrqSd4VdnkJ3bjgH5t2Tn1+gr9a/8gcuVf7B/H9KKKKACii品/2wF8C3m6+fQfAt5eL7h08N3k8m7OdwfztpB9Mce9e2UUUAFFFFABRRRQB/Mpw6+f9b+9wZ/8AasVp92b0Yf7Wz3Of3Xv7w/F3/D3/APaP+F/wr/4Rfxl4R0fxZrc2tNqSy63eJaJeQvBDGgjc8KShhcFCc/MoHVsYv/8Nf8Aw8+KHgv+wbS6utA18XN3cX/9s/Z1tNXa6t5be4TULSaGG2ut8crqWliZz8uWO1ccP+zf/wAExvhJ+zj4wh8Y6XLq3i7xlp3yWOs+Ipo5VsWKMkk0EESJGkrBmAdgzoD8rAkk/V9UAFFFFAH8ynwL+N37R/gn4m6bret/sxWurK3IdI8S3S6WieX1GnWึคื้" style="height:26px; width:auto;" />
       <div><div class="mobile-header-title">My Account</div><div class="mobile-header-sub" id="cust-company-sub">—</div></div>
     </div>
     <div class="mobile-header-actions">
@@ -415,7 +415,7 @@
   </nav>
   <div class="portal">
     <aside class="sidebar">
-      <div class="logo"><img src="https://api.dicebear.com/7.x/initials/svg?seed=TE&backgroundColor=2ecc71" /><div class="logo-text">Terravolt Eco<span>My Account</span></div></div>
+      <div class="logo"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCADIAKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKOrigkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oAMBAAIRAxEAPwD9U6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAorJ8VeLNE8C+H73XfEesaf4f0SyTzLrUtUuo7a2t0zjc8jkKoyRySOtO8L+KtE8ceH7LXfDmsafr+iXqeZa6lpdVHc21wmcbo5EJVhkHkE0AatFFFAB '../../Capture.jpg" style="height:35px; width:auto;" /><div class="logo-text">Terravolt Eco<span>My Account</span></div></div>
       <nav>
         <div class="nav-item active" onclick="navTo('customer','home',this)"><span class="nav-icon">🏠</span> หน้าหลัก</div>
         <div class="nav-item" onclick="navTo('customer','devices',this)"><span class="nav-icon">📡</span> เครื่องของฉัน</div>
@@ -533,10 +533,8 @@
   let currentDealerId = null;
   let currentUserData = null;
 
-  // Apply theme
   if (localStorage.getItem('tv_theme') === 'light') document.body.classList.add('light-mode');
 
-  // Check ref param
   const urlRef = new URLSearchParams(window.location.search).get('ref');
   if (urlRef) sessionStorage.setItem('tv_ref', urlRef);
 
@@ -557,7 +555,6 @@
       } catch(e) {
         currentRole = selectedRole || 'customer';
       }
-      // Only allow dealer or customer
       if (currentRole !== 'dealer' && currentRole !== 'customer') {
         showToast('⚠️','ไม่มีสิทธิ์','Portal นี้สำหรับ Dealer และลูกค้าเท่านั้น');
         auth.signOut(); return;
@@ -619,7 +616,6 @@
     });
   }
 
-  // ══ NAVIGATION ══
   function navTo(portal, page, el) {
     document.querySelectorAll('#screen-' + portal + ' .page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('#screen-' + portal + ' .nav-item').forEach(n => n.classList.remove('active'));
@@ -628,7 +624,6 @@
     window.scrollTo(0,0);
   }
 
-  // ══ DARK MODE ══
   function toggleDark() {
     const isLight = document.body.classList.toggle('light-mode');
     localStorage.setItem('tv_theme', isLight ? 'light' : 'dark');
@@ -637,7 +632,6 @@
     });
   }
 
-  // ══ TOAST ══
   let toastTimer;
   function showToast(icon, title, sub) {
     clearTimeout(toastTimer);
@@ -803,7 +797,6 @@
       if (devList && devList.innerHTML === '') devList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
       if (homeDevList && homeDevList.innerHTML === '') homeDevList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
 
-      // คำนวณจำลอง Metrics การประหยัดพลังงานอ้างอิงจาก Output เครื่อง
       if(deviceCount > 0) {
         document.getElementById('cust-co2').textContent = (totalOutput * 0.45).toFixed(1) + ' kg';
         document.getElementById('cust-savings').textContent = '฿ ' + Math.round(totalOutput * 4.2).toLocaleString();
