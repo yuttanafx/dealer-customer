@@ -7,7 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2=family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg:#0a0f0d; --surface:#111916; --surface2:#182320; --border:#1e2e28;
@@ -40,7 +40,11 @@
     .login-input:focus{border-color:var(--accent);}
     .btn-login{padding:12px;background:var(--accent);color:#0a0f0d;border:none;border-radius:10px;font-family:'Sarabun',sans-serif;font-weight:800;font-size:14px;cursor:pointer;width:100%;margin-top:6px;transition:.15s;}
     .btn-login:hover{background:var(--accent2);}
-    .login-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:10px;}
+    .login-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:10px;margin-bottom:14px;}
+
+    /* ปุ่มเชื่อมโยงหน้ากลางระลอกใหม่ */
+    .btn-hub-link {display:block;text-align:center;padding:10px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:10px;color:var(--accent);font-size:12px;font-weight:700;text-decoration:none;transition:.2s;}
+    .btn-hub-link:hover {background:var(--accent);color:#0a0f0d;border-color:var(--accent2);box-shadow:0 0 15px rgba(46,204,113,0.25);}
 
     /* ══ CANVAS ══ */
     #electric-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
@@ -121,6 +125,7 @@
     .field-error{color:var(--danger);font-size:11px;margin-top:2px;display:none;}
     .upload-zone{border:1.5px dashed var(--border);border-radius:10px;padding:28px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s;margin-top:8px;}
     .upload-zone:hover{border-color:var(--accent);color:var(--accent);}
+    .upload-zone.success{border-color:var(--accent);color:var(--accent);}
     .progress-bar{height:4px;background:var(--border);border-radius:99px;margin-top:8px;overflow:hidden;}
     .progress-fill{height:100%;background:var(--accent);border-radius:99px;}
     .device-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px;}
@@ -128,9 +133,9 @@
     .device-name{font-weight:700;font-size:15px;}
     .device-serial{font-size:11px;color:var(--muted);}
     .device-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-    .metric{background:var(--surface);border-radius:8px;padding:10px;text-align:center;}
-    .metric-val{font-weight:800;font-size:18px;}
-    .metric-label{font-size:10px;color:var(--muted);margin-top:2px;}
+    .device-metrics .metric{background:var(--surface);border-radius:8px;padding:10px;text-align:center;}
+    .device-metrics .metric-val{font-weight:800;font-size:18px;}
+    .device-metrics .metric-label{font-size:10px;color:var(--muted);margin-top:2px;}
 
     /* ══ MODAL ══ */
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
@@ -153,7 +158,7 @@
     .bnav-item.active{color:var(--accent);}
     .bnav-icon{font-size:20px;line-height:1;}
     .bnav-label{font-size:10px;font-weight:600;}
-    .mobile-header{display:none;position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:150;padding:0 16px;align-items:center;justify-content:space-between;height:56px;overflow:hidden;}
+    .mobile-header{display:none;position:fixed;top:0;left:0;right:0;background:var(--surface);border-top:none;border-bottom:1px solid var(--border);z-index:150;padding:0 16px;align-items:center;justify-content:space-between;height:56px;overflow:hidden;}
     .mobile-header-logo{display:flex;align-items:center;gap:8px;}
     .mobile-header-title{font-weight:700;font-size:15px;}
     .mobile-header-sub{font-size:11px;color:var(--muted);}
@@ -250,6 +255,10 @@
     </div>
     <div id="login-error" style="color:var(--danger);font-size:12px;text-align:center;margin-top:8px;display:none;"></div>
     <div class="login-hint">กรุณาเลือกประเภทก่อน Login</div>
+    
+    <a href="https://tve-ecosystem-tech.vercel.app/" target="_blank" class="btn-hub-link">
+        🌐 กลับสู่ระบบนิเวศหลัก TVE Ecosystem ↗
+    </a>
   </div>
 </div>
 
@@ -476,7 +485,7 @@
       </div>
 
       <div class="page" id="customer-page-billing">
-        <div class="topbar"><div class="page-title">ชำระเงิน<span>ประวัติการชำระ</span></div></div>
+        <div class="topbar"><div class="page-title">ชำrateเงิน<span>ประวัติการชำระ</span></div></div>
         <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
           <div>
             <div style="font-size:12px;color:var(--muted);">ยอดค้างชำระ</div>
@@ -803,7 +812,6 @@
       if (devList && devList.innerHTML === '') devList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
       if (homeDevList && homeDevList.innerHTML === '') homeDevList.innerHTML = '<div style="color:var(--muted);font-size:13px;">ยังไม่มีอุปกรณ์</div>';
 
-      // คำนวณจำลอง Metrics การประหยัดพลังงานอ้างอิงจาก Output เครื่อง
       if(deviceCount > 0) {
         document.getElementById('cust-co2').textContent = (totalOutput * 0.45).toFixed(1) + ' kg';
         document.getElementById('cust-savings').textContent = '฿ ' + Math.round(totalOutput * 4.2).toLocaleString();
